@@ -1,0 +1,11 @@
+dev/
+logs/
+repos/
+
+repos.json
+table_names.txt
+excluded_repos.txt
+excluded_endings.txt
+last_updated.txt
+results.txt
+results_summary.txt
