@@ -29,19 +29,6 @@ from bs4 import BeautifulSoup
         # path too long (>260)
 
 
-'''
-generic table names
-
-commodity
-contact
-documentation
-facility
-portfolio
-product
-trade
-'''
-
-
 
 '''
 testing
@@ -57,11 +44,10 @@ def test():
 
 
 
-
 ADO_URL = 'https://dev.azure.com/bp-vsts/NAGPCCR/_apis/git/repositories?api-version=7.0'
 MAX_GIT_ATTEMPTS = 5
 RE_PATTERN_START = "(?<![a-z0-9_])"
-RE_PATTERN_END = "(?![a-zZ0-9_])"
+RE_PATTERN_END = "(?![a-z0-9_])"
 
 REPOS_FOLDER = 'repos'
 REPOS_JSON = 'repos.json'
