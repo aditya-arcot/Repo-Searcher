@@ -48,6 +48,7 @@ ADO_URL = 'https://dev.azure.com/bp-vsts/NAGPCCR/_apis/git/repositories?api-vers
 MAX_GIT_ATTEMPTS = 5
 RE_PATTERN_START = "(?<![a-z0-9_])"
 RE_PATTERN_END = "(?![a-z0-9_])"
+MAX_LINE_PREVIEW_LENGTH = 500
 
 REPOS_FOLDER = 'repos'
 REPOS_JSON = 'repos.json'
@@ -57,8 +58,10 @@ EXCLUDED_ENDINGS_FILE = 'excluded_endings.txt'
 LAST_UPDATED_FILE = 'last_updated.txt'
 FULL_RESULTS_FILE = 'results.txt'
 SUMMARY_RESULTS_FILE = 'results_summary.txt'
+AFFECTED_TABLE_NAMES_FILE = 'affected.txt'
 
 table_names = []
+affected_table_names = set()
 excluded_repos = []
 excluded_dirs = [".git", "obj", "bin", "service references", "connected services"]
 excluded_endings = []
@@ -177,7 +180,7 @@ def search_repo(repo_folder):
 
     matches = {}
     errors = []
-    searched_folders = []
+    searched_subfolders = []
     searched_files = []
 
     for root, dirs, files in os.walk(repo_folder):
@@ -188,7 +191,7 @@ def search_repo(repo_folder):
             if len([file for file in files if file.endswith('.sln')]) != 0:
                 dirs.remove('packages')
 
-        searched_folders += [os.path.join(root, dir) for dir in dirs]
+        searched_subfolders += [os.path.join(root, dir) for dir in dirs]
 
         files[:] = [file for file in files if not file.lower().endswith(tuple(excluded_endings))]
 
@@ -208,7 +211,7 @@ def search_repo(repo_folder):
                 else:
                     errors.append(path)
 
-    return (errors, matches, searched_folders, searched_files)
+    return (errors, matches, searched_subfolders, searched_files)
 
 
 
@@ -222,8 +225,8 @@ def search_legacy_spreadsheet_file(path, matches):
             for n_row in range(sheet.nrows):
                 for n_col in range(sheet.ncols):
                     cell = sheet.cell(n_row, n_col)
-                    search_cell(cell, pattern, sheet.name, n_row, n_col, matches, path, table_name)                   
-                        
+                    search_cell(cell, pattern, sheet.name, n_row, n_col, matches, path, table_name)
+
 
 
 def search_spreadsheet_file(path, matches):
@@ -250,9 +253,12 @@ def search_cell(cell, pattern, sheet_name, n_row, n_col, matches, path, table_na
     val = str(cell.value).lower()
 
     if re.search(pattern, val):
+        if len(val) > MAX_LINE_PREVIEW_LENGTH:
+            val = 'VALUE TOO LONG, LOOK AT FILE'
+
         log_string = f'sheet {sheet_name} row {n_row} col {n_col} - {val}'
 
-        logger.info('hit - %s - %s', table_name, log_string)
+        logger.info('match - %s - %s', table_name, log_string)
         add_new_match(matches, path, table_name, log_string)
 
 
@@ -272,11 +278,14 @@ def search_file(path, matches):
         for line_num, line in enumerate(lines):
             line = line.lower().strip()
             if re.search(pattern, line):
+                if len(line) > MAX_LINE_PREVIEW_LENGTH:
+                    line = 'LINE TOO LONG, LOOK AT FILE'
+
                 log_string = f'line {line_num} - {line}'
 
-                logger.info('hit - %s - %s', table_name, log_string)
+                logger.info('match - %s - %s', table_name, log_string)
                 add_new_match(matches, path, table_name, log_string)
-                        
+
     return True
 
 
@@ -288,7 +297,9 @@ def add_new_match(matches, path, table_name, note):
     if not table_name in matches[path]:
         matches[path][table_name] = []
 
-    matches[path][table_name].append(note)    
+    matches[path][table_name].append(note)
+
+    affected_table_names.add(table_name)
 
 
 
@@ -456,7 +467,7 @@ def write_repo_skipped():
 def write_repo_details(details):
     ''' writes repo validation details to results files '''
 
-    errors, matches, searched_folders, searched_files = details
+    errors, matches, searched_subfolders, searched_files = details
 
     if len(matches) > 0:
         count = 0
@@ -479,12 +490,12 @@ def write_repo_details(details):
 
         write_summary_results_line(f'\terrors: {len(errors)}')
 
-    if len(searched_folders) > 0:
-        write_full_results_line('\tfolders searched:')
-        for folder in searched_folders:
+    if len(searched_subfolders) > 0:
+        write_full_results_line('\tsubfolders searched:')
+        for folder in searched_subfolders:
             write_full_results_line('\t\t' + folder)
 
-        write_summary_results_line(f'\tfolders searched: {len(searched_folders)}')
+        write_summary_results_line(f'\tsubfolders searched: {len(searched_subfolders)}')
 
     if len(searched_files) > 0:
         write_full_results_line('\tfiles searched:')
@@ -500,6 +511,14 @@ def write_repo_end():
 
     write_full_results_line('\n\n')
     write_summary_results_line('\n\n')
+
+
+
+def write_affected_tables():
+    sorted_affected_table_names = sorted(affected_table_names)
+    with open(AFFECTED_TABLE_NAMES_FILE, 'w', encoding='utf-8') as file:
+        for name in sorted_affected_table_names:
+            file.write(name + '\n')
 
 
 
@@ -526,6 +545,7 @@ def main():
     init_results_files()
     search_repos()
     write_last_updated_info()
+    write_affected_tables()
 
 
 
