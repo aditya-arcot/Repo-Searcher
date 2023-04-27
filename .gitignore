@@ -1,6 +1,7 @@
 dev/
 logs/
 repos/
+saved/
 
 repos.json
 table_names.txt
