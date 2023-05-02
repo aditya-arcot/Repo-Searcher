@@ -1,0 +1,81 @@
+## git
+.gitignore
+.gitkeep
+
+## notes
+.md
+.txt
+
+## image / video
+.png
+.gif
+.ico
+.jpg
+.psd
+.pdf
+.swf
+thumbs.db
+
+## font
+.ttf
+.woff
+.woff2
+.otf
+.eot
+
+## compiled
+.dll
+.jar
+.exe
+.apk
+
+## Visual Studio
+.csproj
+.sln
+.suo
+.nupkg
+.dtbcache
+
+## security
+.pfx
+.jks
+.cer
+.der
+.p12
+.snk
+.keystore
+.psafe3
+components.ts
+client.ts
+
+## compressed
+.gz
+.zip
+
+## Linux
+.rpm
+
+## Windows
+.lnk
+
+## Apple
+.ds_store
+.mobileprovision
+
+## MS Office
+.pptx
+.vsd
+.vsdx
+.msg
+
+# other
+testlog.manifest
+slnx.sqlite
+.dtbcache.v2
+client.ts
+ciao-components.ts
+mq.ts
+min.map
+css.map
+getEDWStagingData.json
+getODSStagingData.json

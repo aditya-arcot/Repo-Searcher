@@ -1,0 +1,1702 @@
+ciao-exception-kjar (1)
+	matches: 4
+	subfolders searched: 10
+	files searched: 10
+
+
+
+ansible_nagp_prime (2)
+	matches: 3
+	subfolders searched: 30
+	files searched: 38
+
+
+
+HealthMonitoring (3)
+	matches: 2
+	subfolders searched: 1
+	files searched: 7
+
+
+
+ciao-referencedata-service (4)
+	matches: 85
+	subfolders searched: 28
+	files searched: 45
+
+
+
+ciao-batch-monitor-kjar (5)
+	subfolders searched: 10
+	files searched: 10
+
+
+
+ciao-commons-api-bom (6)
+	matches: 20
+	files searched: 3
+
+
+
+GlobalErrorService (7)
+	matches: 30
+	subfolders searched: 23
+	files searched: 91
+
+
+
+OTCEmailService (8)
+	matches: 27
+	subfolders searched: 25
+	files searched: 57
+
+
+
+TransformationService (9)
+	matches: 2367
+	subfolders searched: 36
+	files searched: 193
+
+
+
+InfohubInputEventConversion (10)
+	subfolders searched: 12
+	files searched: 31
+
+
+
+Global-ErrorPortal-Client (11)
+
+
+
+ciao-ba-platform-extensions (12)
+	matches: 47
+	subfolders searched: 74
+	files searched: 74
+
+
+
+ciao-commons-api (13)
+	matches: 326
+	subfolders searched: 57
+	files searched: 77
+
+
+
+FRRGasService (14)
+	matches: 411
+	subfolders searched: 30
+	files searched: 84
+
+
+
+ciao-utils (15)
+	matches: 1
+	subfolders searched: 102
+	files searched: 29
+
+
+
+AMLClientService (16)
+	matches: 193
+	subfolders searched: 15
+	files searched: 62
+
+
+
+Shared-CCR-Client (17)
+	matches: 19
+	subfolders searched: 28
+	files searched: 114
+
+
+
+DRacer (18)
+	subfolders searched: 1
+	files searched: 3
+
+
+
+Global-ErrorPortal-Web (19)
+
+
+
+TradePowerGroupSubscriber (20)
+	matches: 24
+	subfolders searched: 12
+	files searched: 35
+
+
+
+ansible_ods_ts (21)
+	subfolders searched: 17
+	files searched: 32
+
+
+
+PowerExpirationDataService (22)
+	matches: 6
+	subfolders searched: 10
+	files searched: 22
+
+
+
+ccr_appsvc_secrets (23)
+
+
+
+TradeVaultNTPollerSvc (24)
+	matches: 152
+	subfolders searched: 25
+	files searched: 128
+
+
+
+appWS_CS_ContractInfoListWriterService (25)
+	subfolders searched: 3
+	files searched: 13
+
+
+
+appWS_DS_EInvoiceSearchService (26)
+	matches: 7
+	subfolders searched: 5
+	files searched: 16
+
+
+
+DFDMDB (27)
+
+
+
+ciao-rh-upgrade-config (28)
+	matches: 64
+	subfolders searched: 132
+	files searched: 277
+
+
+
+TradeSearchService (29)
+	matches: 26
+	subfolders searched: 31
+	files searched: 114
+
+
+
+ciao-trade-status-service (30)
+	matches: 25
+	subfolders searched: 35
+	files searched: 38
+
+
+
+ciao-grafana (31)
+	matches: 2
+	subfolders searched: 2
+	files searched: 6
+
+
+
+EDWDB (32)
+	matches: 351
+	subfolders searched: 226
+	files searched: 327
+
+
+
+CC-Web (33)
+	matches: 157
+	subfolders searched: 28
+	files searched: 130
+
+
+
+FRRVariationMargin (34)
+	matches: 149
+	subfolders searched: 22
+	files searched: 58
+
+
+
+ciao-trade-search-service (35)
+	matches: 18
+	subfolders searched: 32
+	files searched: 30
+
+
+
+ciao-deploy-in-progress (36)
+	subfolders searched: 1
+	files searched: 7
+
+
+
+ExchangeReconBreakService (37)
+	matches: 96
+	subfolders searched: 14
+	files searched: 68
+
+
+
+appSB_CCR_ODS (38)
+	matches: 42
+	subfolders searched: 12
+	files searched: 26
+
+
+
+DotnetTools (39)
+	matches: 42
+	subfolders searched: 34
+	files searched: 60
+
+
+
+CCRAccsysFeedFileService (40)
+	subfolders searched: 17
+	files searched: 42
+
+
+
+SRAPositionInputService (41)
+	matches: 90
+	subfolders searched: 41
+	files searched: 107
+
+
+
+ciao-role-mapping (42)
+	subfolders searched: 8
+	files searched: 4
+
+
+
+ciao-deployment-test (43)
+	matches: 8
+	subfolders searched: 11
+	files searched: 18
+
+
+
+ciao (44)
+	files searched: 4
+
+
+
+ciao-inbound-kjar (45)
+	matches: 16
+	subfolders searched: 10
+	files searched: 14
+
+
+
+ciao-query-extension (46)
+	matches: 3
+	subfolders searched: 16
+	files searched: 25
+
+
+
+ansible_nagp_exchange_recon (47)
+	matches: 9
+	subfolders searched: 25
+	files searched: 129
+
+
+
+SFTP (48)
+	subfolders searched: 1
+	files searched: 3
+
+
+
+ConfirmationGlobalService (49)
+	matches: 214
+	subfolders searched: 25
+	files searched: 97
+
+
+
+ciao-outbound-controller (50)
+	matches: 47
+	subfolders searched: 69
+	files searched: 121
+
+
+
+ciao-audit-consumer (51)
+	matches: 45
+	subfolders searched: 61
+	files searched: 89
+
+
+
+ciao-selenium (52)
+	subfolders searched: 1
+	files searched: 9
+
+
+
+ansible_nagp_ccr_app_webservices (53)
+	matches: 2
+	subfolders searched: 33
+	files searched: 194
+
+
+
+Release_Documents (54)
+	matches: 207
+	subfolders searched: 7
+	files searched: 5
+
+
+
+FRR-EmailService (55)
+	matches: 54
+	subfolders searched: 14
+	files searched: 49
+
+
+
+SMM-Web (56)
+	matches: 52
+	subfolders searched: 29
+	files searched: 77
+
+
+
+OTC_ExchangeFee_Service (57)
+	matches: 60
+	subfolders searched: 14
+	files searched: 52
+
+
+
+Casper-Common (58)
+	matches: 1
+	subfolders searched: 9
+	files searched: 59
+
+
+
+ciao-pam7 (59)
+	matches: 4
+	subfolders searched: 21
+	files searched: 25
+
+
+
+TestAutomation_ExchangeReconPortal (60)
+	matches: 801
+	subfolders searched: 31
+	files searched: 123
+
+
+
+TradeService_old (61)
+	matches: 611
+	subfolders searched: 34
+	files searched: 356
+
+
+
+TestAutomation_Common (62)
+	skipped
+
+
+
+appWS_FYI_GetBusinessDaysService (63)
+	matches: 4
+	subfolders searched: 4
+	files searched: 16
+
+
+
+InfohubFacilityOutboundService (64)
+
+
+
+JavaPasswordResetTool (65)
+	matches: 3
+	subfolders searched: 9
+	files searched: 47
+
+
+
+SimpleEventProcessorService (66)
+	matches: 53
+	subfolders searched: 11
+	files searched: 37
+
+
+
+ciao-image-copy (67)
+
+
+
+TestAutomation (68)
+	subfolders searched: 3
+	files searched: 3
+
+
+
+HeliosPlazaMapSP (69)
+	subfolders searched: 7
+	files searched: 18
+
+
+
+ciao-processes-tests (70)
+	matches: 163
+	subfolders searched: 41
+	files searched: 114
+
+
+
+ciao-process-admin-extension (71)
+	subfolders searched: 10
+	files searched: 11
+
+
+
+TradeService (72)
+	matches: 1066
+	subfolders searched: 42
+	files searched: 555
+
+
+
+ciao-amq7-rosa (73)
+
+
+
+ciao-commons (74)
+	matches: 20
+	subfolders searched: 51
+	files searched: 40
+
+
+
+ciao-bom (75)
+	matches: 5
+	files searched: 1
+
+
+
+ciao-kjars-parent (76)
+	matches: 122
+	subfolders searched: 33
+	files searched: 46
+
+
+
+ciao-autochasing (77)
+	matches: 118
+	subfolders searched: 45
+	files searched: 73
+
+
+
+ValuationService (78)
+	matches: 503
+	subfolders searched: 20
+	files searched: 93
+
+
+
+ciao-yaapi (79)
+	subfolders searched: 9
+	files searched: 6
+
+
+
+CASPERDB (80)
+
+
+
+DB_QUILT (81)
+	subfolders searched: 11
+	files searched: 10
+
+
+
+kafka-demo (82)
+	matches: 26
+	subfolders searched: 13
+	files searched: 25
+
+
+
+GptaSharedServicePortal-Client (83)
+	matches: 37
+	subfolders searched: 96
+	files searched: 333
+
+
+
+appWS_DS_PortalUploadNotifierService (84)
+	matches: 1
+	subfolders searched: 4
+	files searched: 13
+
+
+
+ciao-uber-kjar-deployments (85)
+	files searched: 1
+
+
+
+ciao-jwt-eap (86)
+	matches: 6
+	subfolders searched: 61
+	files searched: 72
+
+
+
+ciao-ui-extn (87)
+	matches: 7889
+	subfolders searched: 83
+	files searched: 194
+
+
+
+ReportableService (88)
+	matches: 201
+	subfolders searched: 30
+	files searched: 71
+
+
+
+FRR-ARTT-WEB (89)
+
+
+
+ciao-test-bpm (90)
+	subfolders searched: 26
+	files searched: 48
+
+
+
+ciao-ngsa-perf-test (91)
+	matches: 1
+	subfolders searched: 4
+	files searched: 8
+
+
+
+ciao-document-dispatch-service (92)
+	matches: 130
+	subfolders searched: 77
+	files searched: 237
+
+
+
+GPTASharedServicePortal-Web (93)
+	matches: 107
+	subfolders searched: 90
+	files searched: 284
+
+
+
+FilterService (94)
+	subfolders searched: 10
+	files searched: 22
+
+
+
+BatchService (95)
+	subfolders searched: 1
+	files searched: 5
+
+
+
+ciao-content-management-service (96)
+	matches: 2
+	subfolders searched: 41
+	files searched: 144
+
+
+
+ReferenceDataService (97)
+	matches: 169
+	subfolders searched: 33
+	files searched: 253
+
+
+
+DOAMDB (98)
+
+
+
+FRR-MO (99)
+	matches: 215
+	subfolders searched: 71
+	files searched: 154
+
+
+
+appSB_%20CCRAccSys_FeedFile (100)
+	subfolders searched: 9
+	files searched: 3
+
+
+
+ciao-batch-processes (101)
+	matches: 15
+	subfolders searched: 67
+	files searched: 110
+
+
+
+TradeVaultCommon (102)
+	matches: 20
+	subfolders searched: 13
+	files searched: 63
+
+
+
+InfohubTradeSearchService (103)
+	matches: 53
+	subfolders searched: 27
+	files searched: 103
+
+
+
+ciao-document-generation (104)
+	matches: 1917
+	subfolders searched: 60
+	files searched: 126
+
+
+
+ciao-java11-s2i (105)
+	subfolders searched: 2
+	files searched: 5
+
+
+
+DB_DFCR (106)
+	matches: 84
+	subfolders searched: 3
+	files searched: 17
+
+
+
+ciao-rule-management-service (107)
+	matches: 156
+	subfolders searched: 43
+	files searched: 77
+
+
+
+FRRCollateralAndMargin (108)
+	matches: 15
+	subfolders searched: 18
+	files searched: 52
+
+
+
+DFCR (109)
+	matches: 81
+	subfolders searched: 23
+	files searched: 62
+
+
+
+EDW_ArchiveService (110)
+
+
+
+DealNominationPubService (111)
+	matches: 3
+	subfolders searched: 12
+	files searched: 33
+
+
+
+ciao-audit-listeners (112)
+	subfolders searched: 12
+	files searched: 7
+
+
+
+gas-flow-database (113)
+
+
+
+ciao-trade-service (114)
+	matches: 388
+	subfolders searched: 62
+	files searched: 154
+
+
+
+ciao-view-service (115)
+	subfolders searched: 42
+	files searched: 72
+
+
+
+ciao-ods-service (116)
+	matches: 27
+	subfolders searched: 39
+	files searched: 60
+
+
+
+ciao-dealmatch-service (117)
+	matches: 77
+	subfolders searched: 41
+	files searched: 56
+
+
+
+ciao-eleox-pair-quarkus (118)
+
+
+
+FRRDashboard (119)
+	matches: 4400
+	subfolders searched: 122
+	files searched: 733
+
+
+
+ansible_ccr_portal_services (120)
+	subfolders searched: 17
+	files searched: 24
+
+
+
+ciao-commons-bom (121)
+	matches: 5
+	files searched: 3
+
+
+
+adap_etpub-calratevalue (122)
+	skipped
+
+
+
+ODSDataService (123)
+	matches: 107
+	subfolders searched: 17
+	files searched: 51
+
+
+
+StonebranchJobs (124)
+
+
+
+InfohubPortfolioOutboundService (125)
+
+
+
+Temp_POC_DotNet (126)
+
+
+
+ansible_ccr_stonebranch (127)
+	subfolders searched: 17
+	files searched: 24
+
+
+
+SMM-Client (128)
+	matches: 6
+	subfolders searched: 12
+	files searched: 41
+
+
+
+RSPOSITIONSTGDB (129)
+	matches: 66
+	subfolders searched: 3
+	files searched: 7
+
+
+
+ciao-startstop-scaling (130)
+
+
+
+Dummy (131)
+	files searched: 1
+
+
+
+CAM-CloudAssetManager (132)
+	matches: 60
+	subfolders searched: 28
+	files searched: 335
+
+
+
+PowerShellScripts (133)
+	subfolders searched: 14
+	files searched: 7
+
+
+
+ansible_nagp_eod_regreporting (134)
+	matches: 9
+	subfolders searched: 31
+	files searched: 179
+
+
+
+DB_IMNA (135)
+
+
+
+ciao-message-bridge (136)
+	subfolders searched: 9
+	files searched: 11
+
+
+
+FRR-ARTT (137)
+	matches: 1
+	subfolders searched: 6
+	files searched: 28
+
+
+
+appWS_DS_DealHistoryService (138)
+	subfolders searched: 5
+	files searched: 15
+
+
+
+OCR (139)
+	matches: 2
+	subfolders searched: 20
+	files searched: 91
+
+
+
+appWS_DS_MetadataLookupService (140)
+	subfolders searched: 3
+	files searched: 13
+
+
+
+appWS_DS_DocumentFaxService (141)
+	subfolders searched: 3
+	files searched: 10
+
+
+
+ciao-uber-kjar-operator (142)
+
+
+
+appWS_DS_InvoiceAlertService (143)
+	subfolders searched: 4
+	files searched: 10
+
+
+
+ciao-node-bff (144)
+	matches: 199
+	subfolders searched: 11
+	files searched: 59
+
+
+
+ciao-soapui-utils (145)
+	matches: 1698
+	subfolders searched: 19
+	files searched: 36
+
+
+
+DataService (146)
+	subfolders searched: 4
+	files searched: 10
+
+
+
+ciao-openshift-imagestreams (147)
+	subfolders searched: 1
+	files searched: 2
+
+
+
+ciao-special-handling-kjar (148)
+	subfolders searched: 14
+	files searched: 11
+
+
+
+appWS_FYI_CurveFetchService (149)
+	matches: 4
+	subfolders searched: 15
+	files searched: 47
+
+
+
+DB_ECON (150)
+
+
+
+ciao-auto-scaling (151)
+	matches: 3
+	subfolders searched: 4
+	files searched: 14
+
+
+
+appWS_DS_MetadataWriterService (152)
+	subfolders searched: 5
+	files searched: 25
+
+
+
+ECONDB (153)
+
+
+
+appWS_CCR_Common (154)
+	matches: 20
+	subfolders searched: 46
+	files searched: 126
+
+
+
+ciao-pam7-operator (155)
+
+
+
+ciao-release (156)
+	matches: 30
+	subfolders searched: 9
+	files searched: 50
+
+
+
+ciao-amq7-operator (157)
+
+
+
+ciao-monitoring-operator (158)
+	matches: 1
+	subfolders searched: 6
+	files searched: 43
+
+
+
+ciao-bpm-db (159)
+	subfolders searched: 12
+	files searched: 14
+
+
+
+OTCFlatFileGeneration (160)
+	matches: 2
+	subfolders searched: 16
+	files searched: 47
+
+
+
+ciao-outbound-processor (161)
+	matches: 19
+	subfolders searched: 31
+	files searched: 56
+
+
+
+FRR-ARTT-Client (162)
+
+
+
+ciao-ods-ddl (163)
+	matches: 349
+	subfolders searched: 26
+	files searched: 171
+
+
+
+ODSPortal (164)
+	matches: 2291
+	subfolders searched: 123
+	files searched: 634
+
+
+
+NMS-Framework (165)
+	matches: 7
+	subfolders searched: 9
+	files searched: 53
+
+
+
+InfohubPositionOutputService (166)
+	matches: 118
+	subfolders searched: 25
+	files searched: 129
+
+
+
+PRM (167)
+	matches: 422
+	subfolders searched: 31
+	files searched: 173
+
+
+
+ciao-commons-model (168)
+	matches: 23
+	subfolders searched: 157
+	files searched: 117
+
+
+
+ciao-docs (169)
+	matches: 56
+	subfolders searched: 11
+	files searched: 12
+
+
+
+appWS_DOA_DOAMService (170)
+	matches: 69
+	subfolders searched: 5
+	files searched: 12
+
+
+
+ciao-stp-kjar (171)
+	matches: 8
+	subfolders searched: 10
+	files searched: 14
+
+
+
+ciao-performance-tests (172)
+	matches: 71
+	subfolders searched: 26
+	files searched: 38
+
+
+
+appWS_DS_FirstOfMonthPricingService (173)
+	subfolders searched: 5
+	files searched: 15
+
+
+
+ciao-agent-bond (174)
+	subfolders searched: 51
+	files searched: 22
+
+
+
+TestAutomation_ErrorPortal (175)
+	subfolders searched: 3
+	files searched: 3
+
+
+
+FRRCommonTransformation (176)
+	matches: 2298
+	subfolders searched: 25
+	files searched: 314
+
+
+
+DFDM-New (177)
+	matches: 219
+	subfolders searched: 73
+	files searched: 330
+
+
+
+appSB_CCR_LTR (178)
+	matches: 3
+	subfolders searched: 12
+	files searched: 23
+
+
+
+SSRDB (179)
+	subfolders searched: 5
+	files searched: 5
+
+
+
+appWS_FYI_HeliosPlazaMapService (180)
+	subfolders searched: 4
+	files searched: 13
+
+
+
+FTH-Client (181)
+
+
+
+ErrorServicePublisher (182)
+	subfolders searched: 3
+	files searched: 12
+
+
+
+ciao-acceptance-tests (183)
+	matches: 128
+	subfolders searched: 15
+	files searched: 116
+
+
+
+ILSDB (184)
+
+
+
+ciao-uber-kjar (185)
+	matches: 7
+	subfolders searched: 13
+	files searched: 11
+
+
+
+CCR.Common (186)
+
+
+
+ciao-testing-kjars (187)
+	matches: 6
+	subfolders searched: 20
+	files searched: 16
+
+
+
+TradeVaultService (188)
+	matches: 166
+	subfolders searched: 37
+	files searched: 154
+
+
+
+TransportAgreementPubService (189)
+	subfolders searched: 9
+	files searched: 20
+
+
+
+TradePowerPubSub (190)
+	matches: 26
+	subfolders searched: 10
+	files searched: 28
+
+
+
+ciao-amq-perf-test (191)
+	subfolders searched: 1
+	files searched: 3
+
+
+
+ansible_nagp_appd_db_monitoring (192)
+	subfolders searched: 14
+	files searched: 28
+
+
+
+ciao-prometheus (193)
+	subfolders searched: 3
+	files searched: 10
+
+
+
+BTMEnrichmentService (194)
+	matches: 10
+	subfolders searched: 30
+	files searched: 86
+
+
+
+NGLReconService (195)
+	subfolders searched: 12
+	files searched: 28
+
+
+
+FRRInitialMargin (196)
+	matches: 280
+	subfolders searched: 23
+	files searched: 76
+
+
+
+ciao-data-service (197)
+	matches: 202
+	subfolders searched: 59
+	files searched: 123
+
+
+
+FTH-Web (198)
+	matches: 98
+	subfolders searched: 30
+	files searched: 108
+
+
+
+TradePowerBatchManagement (199)
+	matches: 2
+	subfolders searched: 3
+	files searched: 15
+
+
+
+CommonBinaries (200)
+	subfolders searched: 3
+	files searched: 3
+
+
+
+AntiMoneyLaunderingService (201)
+	files searched: 1
+
+
+
+ciao-ba-platform-parent (202)
+	matches: 5
+	subfolders searched: 1
+	files searched: 4
+
+
+
+ciao-kjar-cleanup (203)
+	subfolders searched: 25
+	files searched: 17
+
+
+
+GlobalConfirmations (204)
+	skipped
+
+
+
+PTMDB (205)
+	subfolders searched: 5
+	files searched: 2
+
+
+
+NMS-AMQP-Framework (206)
+	subfolders searched: 8
+	files searched: 42
+
+
+
+TestAutomation_FRRFitPortal (207)
+	matches: 489
+	subfolders searched: 37
+	files searched: 211
+
+
+
+Global-ErrorPortal (208)
+	matches: 141
+	subfolders searched: 51
+	files searched: 298
+
+
+
+ansible_nagp_realtime_regreporting (209)
+	matches: 87
+	subfolders searched: 33
+	files searched: 206
+
+
+
+appWS_CS_ContactDataWriterService (210)
+	subfolders searched: 4
+	files searched: 15
+
+
+
+InfohubClientService (211)
+	matches: 235
+	subfolders searched: 39
+	files searched: 117
+
+
+
+ciao-inbound-docrouterservice (212)
+	subfolders searched: 26
+	files searched: 31
+
+
+
+ciao-rh-upgrade-ciao-pipelines (213)
+	matches: 5
+	subfolders searched: 4
+	files searched: 8
+
+
+
+UEHPublish (214)
+	matches: 153
+	subfolders searched: 3
+	files searched: 17
+
+
+
+ciao-amq7 (215)
+	matches: 1
+	subfolders searched: 5
+	files searched: 12
+
+
+
+CrossCommodityPortal (216)
+	matches: 222
+	subfolders searched: 95
+	files searched: 458
+
+
+
+EConfirmTransformationService (217)
+	matches: 2722
+	subfolders searched: 69
+	files searched: 561
+
+
+
+DOAM-Service (218)
+	matches: 69
+	subfolders searched: 12
+	files searched: 34
+
+
+
+OCPCreditPubService (219)
+	subfolders searched: 10
+	files searched: 28
+
+
+
+ciao-ui (220)
+	matches: 713
+	subfolders searched: 69
+	files searched: 269
+
+
+
+QUILTService (221)
+	matches: 26
+	subfolders searched: 26
+	files searched: 89
+
+
+
+FRRPowerService (222)
+	matches: 459
+	subfolders searched: 32
+	files searched: 78
+
+
+
+ansible_password_reset (223)
+	subfolders searched: 1
+	files searched: 1
+
+
+
+CO-Client (224)
+	matches: 46
+	subfolders searched: 39
+	files searched: 208
+
+
+
+appSB_CCR_SPADFDM (225)
+	subfolders searched: 6
+	files searched: 9
+
+
+
+appWS_DS_PipelineDataService (226)
+	matches: 3
+	subfolders searched: 3
+	files searched: 13
+
+
+
+DB_ODS (227)
+	skipped
+
+
+
+ansible_nagp_btm (228)
+	subfolders searched: 18
+	files searched: 50
+
+
+
+ciao-java-s2i (229)
+	subfolders searched: 2
+	files searched: 5
+
+
+
+InfoHubBatchController (230)
+
+
+
+ciao-groups (231)
+	subfolders searched: 27
+	files searched: 12
+
+
+
+EIADB (232)
+
+
+
+gas-flow-client (233)
+	files searched: 1
+
+
+
+ccr_appsvc_security (234)
+
+
+
+CUSTOMER_INFO (235)
+
+
+
+Shared-CCR-Web (236)
+	subfolders searched: 16
+	files searched: 32
+
+
+
+conf-insights-consumer (237)
+	matches: 32
+	subfolders searched: 43
+	files searched: 119
+
+
+
+TradeVaultEODSvc (238)
+	matches: 1116
+	subfolders searched: 26
+	files searched: 86
+
+
+
+ciao-external-secrets-operator (239)
+	matches: 54
+	subfolders searched: 9
+	files searched: 45
+
+
+
+EnrichmentService (240)
+	matches: 1383
+	subfolders searched: 31
+	files searched: 151
+
+
+
+FRR-Common (241)
+	matches: 960
+	subfolders searched: 18
+	files searched: 278
+
+
+
+FRR-Web (242)
+	matches: 47
+	subfolders searched: 23
+	files searched: 73
+
+
+
+DbRoll (243)
+
+
+
+ciao-eleox-pair (244)
+	matches: 1
+	subfolders searched: 28
+	files searched: 36
+
+
+
+DB_CASPER (245)
+
+
+
+ansible_ocr (246)
+	subfolders searched: 15
+	files searched: 28
+
+
+
+OCRDB (247)
+
+
+
+PositionTransformationService (248)
+	matches: 204
+	subfolders searched: 21
+	files searched: 55
+
+
+
+TestAutomation_CCPortal (249)
+	matches: 206
+	subfolders searched: 37
+	files searched: 106
+
+
+
+gas-flow-web (250)
+
+
+
+TradeVaultRealtimeSvc (251)
+	matches: 49
+	subfolders searched: 25
+	files searched: 85
+
+
+
+ciao-sharepoint-service (252)
+	matches: 7
+	subfolders searched: 34
+	files searched: 60
+
+
+
+CCR-TradeSubmission (253)
+
+
+
+appWS_DS_OfficeLocatorDataService (254)
+	matches: 29
+	subfolders searched: 2
+	files searched: 9
+
+
+
+ciao-commons-model-bom (255)
+	matches: 5
+	files searched: 3
+
+
+
+InfohubPositionInputService (256)
+	matches: 224
+	subfolders searched: 19
+	files searched: 74
+
+
+
+EnterpriseLibraries (257)
+
+
+
+PETService (258)
+
+
+
+ciao-test-double (259)
+	matches: 12738
+	subfolders searched: 104
+	files searched: 395
+
+
+
+ciao-pam7-source (260)
+
+
+
+InfohubBusPartyService (261)
+	matches: 1
+	subfolders searched: 17
+	files searched: 41
+
+
+
+IMNADB (262)
+	subfolders searched: 3
+	files searched: 2
+
+
+
+appWS_CS_ContractDataLookupService (263)
+	subfolders searched: 4
+	files searched: 16
+
+
+
+appSB_CCR_OCR (264)
+	subfolders searched: 8
+	files searched: 14
+
+
+
+QUILTDB (265)
+
+
+
+PasswordResetTool (266)
+	subfolders searched: 6
+	files searched: 13
+
+
+
+LTRTranslationService (267)
+	matches: 3
+	subfolders searched: 12
+	files searched: 31
+
+
+
+appSB_Stonebranch_Common (268)
+
+
+
+CC-Client (269)
+	matches: 179
+	subfolders searched: 27
+	files searched: 116
+
+
+
+FRR-FTH (270)
+	matches: 1
+	subfolders searched: 7
+	files searched: 28
+
+
+
+FRRNGLTransformationService (271)
+	matches: 170
+	subfolders searched: 31
+	files searched: 54
+
+
+
+FRR-Client (272)
+	matches: 9
+	subfolders searched: 13
+	files searched: 44
+
+
+
+ansible_nagp_shared_services (273)
+	matches: 10
+	subfolders searched: 35
+	files searched: 221
+
+
+
