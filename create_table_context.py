@@ -1,5 +1,4 @@
 import openpyxl
-import os
 import re
 
 RE_PATTERN_START = "(?<![a-z0-9_])"
@@ -26,7 +25,9 @@ def search_workbook(name, workbook):
                 if re.search(pattern, val):
                     col_header = sheet.cell(row=1, column=n_col+1).value.lower() #1-indexed
 
-                    matches.append([sheet.title, col_header])
+                    match = [sheet.title, col_header]
+                    if match not in matches:
+                        matches.append([sheet.title, col_header])
 
     assert len(matches) > 0
     write_table(name, matches)
@@ -35,9 +36,12 @@ def write_table(name, matches):
     with open('table_context.txt', 'a') as f:
         f.write(f'{name}\t' + ', '.join([sheet + ' (' + col + ')' for sheet, col in matches]) + '\n')
 
+    unique_schemas = set()
+    for sheet, _ in matches:
+        unique_schemas.add(sheet)
     with open('schema_table_pairs.txt', 'a') as f:
-        for sheet, _ in matches:
-            f.write(f'{sheet}\t{name}\n')
+        for schema in unique_schemas:
+            f.write(f'{schema}\t{name}\n')
 
 with open('schema_table_pairs.txt', 'w') as f:
     f.write('')
