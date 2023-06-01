@@ -3,3 +3,5 @@ logs/
 repos/
 saved/
 *.txt
+ODS_DEPENDECY_DETAILS.xlsx
+repos.json
