@@ -1,85 +1,65 @@
 ciao-exception-kjar (1)
-	matches: 4
-	subfolders searched: 10
-	files searched: 10
+	skipped
 
 
 
 ansible_nagp_prime (2)
-	matches: 3
-	subfolders searched: 30
-	files searched: 38
+	skipped
 
 
 
 HealthMonitoring (3)
-	matches: 2
-	subfolders searched: 1
-	files searched: 7
+	skipped
 
 
 
 ciao-referencedata-service (4)
-	matches: 85
-	subfolders searched: 28
-	files searched: 45
+	skipped
 
 
 
 ciao-batch-monitor-kjar (5)
-	subfolders searched: 10
-	files searched: 10
+	skipped
 
 
 
 ciao-commons-api-bom (6)
-	matches: 20
-	files searched: 3
+	skipped
 
 
 
 GlobalErrorService (7)
-	matches: 30
-	subfolders searched: 23
-	files searched: 91
+	skipped
 
 
 
 OTCEmailService (8)
-	matches: 27
-	subfolders searched: 25
-	files searched: 57
+	skipped
 
 
 
 TransformationService (9)
-	matches: 2367
-	subfolders searched: 36
-	files searched: 193
+	skipped
 
 
 
 InfohubInputEventConversion (10)
-	subfolders searched: 12
-	files searched: 31
+	skipped
 
 
 
 Global-ErrorPortal-Client (11)
+	skipped
 
 
 
 ciao-ba-platform-extensions (12)
-	matches: 47
-	subfolders searched: 74
-	files searched: 74
+	skipped
 
 
 
 ciao-commons-api (13)
-	matches: 326
-	subfolders searched: 57
-	files searched: 77
+	skipped
 
 
 
@@ -91,312 +71,237 @@ FRRGasService (14)
 
 
 ciao-utils (15)
-	matches: 1
-	subfolders searched: 102
-	files searched: 29
+	skipped
 
 
 
 AMLClientService (16)
-	matches: 193
-	subfolders searched: 15
-	files searched: 62
+	skipped
 
 
 
 Shared-CCR-Client (17)
-	matches: 19
-	subfolders searched: 28
-	files searched: 114
+	skipped
 
 
 
 DRacer (18)
-	subfolders searched: 1
-	files searched: 3
+	skipped
 
 
 
 Global-ErrorPortal-Web (19)
+	skipped
 
 
 
 TradePowerGroupSubscriber (20)
-	matches: 24
-	subfolders searched: 12
-	files searched: 35
+	skipped
 
 
 
 ansible_ods_ts (21)
-	subfolders searched: 17
-	files searched: 32
+	skipped
 
 
 
 PowerExpirationDataService (22)
-	matches: 6
-	subfolders searched: 10
-	files searched: 22
+	skipped
 
 
 
 ccr_appsvc_secrets (23)
+	skipped
 
 
 
 TradeVaultNTPollerSvc (24)
-	matches: 152
-	subfolders searched: 25
-	files searched: 128
+	skipped
 
 
 
 appWS_CS_ContractInfoListWriterService (25)
-	subfolders searched: 3
-	files searched: 13
+	skipped
 
 
 
 appWS_DS_EInvoiceSearchService (26)
-	matches: 7
-	subfolders searched: 5
-	files searched: 16
+	skipped
 
 
 
 DFDMDB (27)
+	skipped
 
 
 
 ciao-rh-upgrade-config (28)
-	matches: 64
-	subfolders searched: 132
-	files searched: 277
+	skipped
 
 
 
 TradeSearchService (29)
-	matches: 26
-	subfolders searched: 31
-	files searched: 114
+	skipped
 
 
 
 ciao-trade-status-service (30)
-	matches: 25
-	subfolders searched: 35
-	files searched: 38
+	skipped
 
 
 
 ciao-grafana (31)
-	matches: 2
-	subfolders searched: 2
-	files searched: 6
+	skipped
 
 
 
 EDWDB (32)
-	matches: 351
-	subfolders searched: 226
-	files searched: 327
+	skipped
 
 
 
 CC-Web (33)
-	matches: 157
-	subfolders searched: 28
-	files searched: 130
+	skipped
 
 
 
 FRRVariationMargin (34)
-	matches: 149
-	subfolders searched: 22
-	files searched: 58
+	skipped
 
 
 
 ciao-trade-search-service (35)
-	matches: 18
-	subfolders searched: 32
-	files searched: 30
+	skipped
 
 
 
 ciao-deploy-in-progress (36)
-	subfolders searched: 1
-	files searched: 7
+	skipped
 
 
 
 ExchangeReconBreakService (37)
-	matches: 96
-	subfolders searched: 14
-	files searched: 68
+	skipped
 
 
 
 appSB_CCR_ODS (38)
-	matches: 42
-	subfolders searched: 12
-	files searched: 26
+	skipped
 
 
 
 DotnetTools (39)
-	matches: 42
-	subfolders searched: 34
-	files searched: 60
+	skipped
 
 
 
 CCRAccsysFeedFileService (40)
-	subfolders searched: 17
-	files searched: 42
+	skipped
 
 
 
 SRAPositionInputService (41)
-	matches: 90
-	subfolders searched: 41
-	files searched: 107
+	skipped
 
 
 
 ciao-role-mapping (42)
-	subfolders searched: 8
-	files searched: 4
+	skipped
 
 
 
 ciao-deployment-test (43)
-	matches: 8
-	subfolders searched: 11
-	files searched: 18
+	skipped
 
 
 
 ciao (44)
-	files searched: 4
+	skipped
 
 
 
 ciao-inbound-kjar (45)
-	matches: 16
-	subfolders searched: 10
-	files searched: 14
+	skipped
 
 
 
 ciao-query-extension (46)
-	matches: 3
-	subfolders searched: 16
-	files searched: 25
+	skipped
 
 
 
 ansible_nagp_exchange_recon (47)
-	matches: 9
-	subfolders searched: 25
-	files searched: 129
+	skipped
 
 
 
 SFTP (48)
-	subfolders searched: 1
-	files searched: 3
+	skipped
 
 
 
 ConfirmationGlobalService (49)
-	matches: 214
-	subfolders searched: 25
-	files searched: 97
+	skipped
 
 
 
 ciao-outbound-controller (50)
-	matches: 47
-	subfolders searched: 69
-	files searched: 121
+	skipped
 
 
 
 ciao-audit-consumer (51)
-	matches: 45
-	subfolders searched: 61
-	files searched: 89
+	skipped
 
 
 
 ciao-selenium (52)
-	subfolders searched: 1
-	files searched: 9
+	skipped
 
 
 
 ansible_nagp_ccr_app_webservices (53)
-	matches: 2
-	subfolders searched: 33
-	files searched: 194
+	skipped
 
 
 
 Release_Documents (54)
-	matches: 207
-	subfolders searched: 7
-	files searched: 5
+	skipped
 
 
 
 FRR-EmailService (55)
-	matches: 54
-	subfolders searched: 14
-	files searched: 49
+	skipped
 
 
 
 SMM-Web (56)
-	matches: 52
-	subfolders searched: 29
-	files searched: 77
+	skipped
 
 
 
 OTC_ExchangeFee_Service (57)
-	matches: 60
-	subfolders searched: 14
-	files searched: 52
+	skipped
 
 
 
 Casper-Common (58)
-	matches: 1
-	subfolders searched: 9
-	files searched: 59
+	skipped
 
 
 
 ciao-pam7 (59)
-	matches: 4
-	subfolders searched: 21
-	files searched: 25
+	skipped
 
 
 
 TestAutomation_ExchangeReconPortal (60)
-	matches: 801
-	subfolders searched: 31
-	files searched: 123
+	skipped
 
 
 
 TradeService_old (61)
-	matches: 611
-	subfolders searched: 34
-	files searched: 356
+	skipped
 
 
 
@@ -406,371 +311,297 @@ TestAutomation_Common (62)
 
 
 appWS_FYI_GetBusinessDaysService (63)
-	matches: 4
-	subfolders searched: 4
-	files searched: 16
+	skipped
 
 
 
 InfohubFacilityOutboundService (64)
+	skipped
 
 
 
 JavaPasswordResetTool (65)
-	matches: 3
-	subfolders searched: 9
-	files searched: 47
+	skipped
 
 
 
 SimpleEventProcessorService (66)
-	matches: 53
-	subfolders searched: 11
-	files searched: 37
+	skipped
 
 
 
 ciao-image-copy (67)
+	skipped
 
 
 
 TestAutomation (68)
-	subfolders searched: 3
-	files searched: 3
+	skipped
 
 
 
 HeliosPlazaMapSP (69)
-	subfolders searched: 7
-	files searched: 18
+	skipped
 
 
 
 ciao-processes-tests (70)
-	matches: 163
-	subfolders searched: 41
-	files searched: 114
+	skipped
 
 
 
 ciao-process-admin-extension (71)
-	subfolders searched: 10
-	files searched: 11
+	skipped
 
 
 
 TradeService (72)
-	matches: 1066
-	subfolders searched: 42
-	files searched: 555
+	skipped
 
 
 
 ciao-amq7-rosa (73)
+	skipped
 
 
 
 ciao-commons (74)
-	matches: 20
-	subfolders searched: 51
-	files searched: 40
+	skipped
 
 
 
 ciao-bom (75)
-	matches: 5
-	files searched: 1
+	skipped
 
 
 
 ciao-kjars-parent (76)
-	matches: 122
-	subfolders searched: 33
-	files searched: 46
+	skipped
 
 
 
 ciao-autochasing (77)
-	matches: 118
-	subfolders searched: 45
-	files searched: 73
+	skipped
 
 
 
 ValuationService (78)
-	matches: 503
-	subfolders searched: 20
-	files searched: 93
+	skipped
 
 
 
 ciao-yaapi (79)
-	subfolders searched: 9
-	files searched: 6
+	skipped
 
 
 
 CASPERDB (80)
+	skipped
 
 
 
 DB_QUILT (81)
-	subfolders searched: 11
-	files searched: 10
+	skipped
 
 
 
 kafka-demo (82)
-	matches: 26
-	subfolders searched: 13
-	files searched: 25
+	skipped
 
 
 
 GptaSharedServicePortal-Client (83)
-	matches: 37
-	subfolders searched: 96
-	files searched: 333
+	skipped
 
 
 
 appWS_DS_PortalUploadNotifierService (84)
-	matches: 1
-	subfolders searched: 4
-	files searched: 13
+	skipped
 
 
 
 ciao-uber-kjar-deployments (85)
-	files searched: 1
+	skipped
 
 
 
 ciao-jwt-eap (86)
-	matches: 6
-	subfolders searched: 61
-	files searched: 72
+	skipped
 
 
 
 ciao-ui-extn (87)
-	matches: 7889
-	subfolders searched: 83
-	files searched: 194
+	skipped
 
 
 
 ReportableService (88)
-	matches: 201
-	subfolders searched: 30
-	files searched: 71
+	skipped
 
 
 
 FRR-ARTT-WEB (89)
+	skipped
 
 
 
 ciao-test-bpm (90)
-	subfolders searched: 26
-	files searched: 48
+	skipped
 
 
 
 ciao-ngsa-perf-test (91)
-	matches: 1
-	subfolders searched: 4
-	files searched: 8
+	skipped
 
 
 
 ciao-document-dispatch-service (92)
-	matches: 130
-	subfolders searched: 77
-	files searched: 237
+	skipped
 
 
 
 GPTASharedServicePortal-Web (93)
-	matches: 107
-	subfolders searched: 90
-	files searched: 284
+	skipped
 
 
 
 FilterService (94)
-	subfolders searched: 10
-	files searched: 22
+	skipped
 
 
 
 BatchService (95)
-	subfolders searched: 1
-	files searched: 5
+	skipped
 
 
 
 ciao-content-management-service (96)
-	matches: 2
-	subfolders searched: 41
-	files searched: 144
+	skipped
 
 
 
 ReferenceDataService (97)
-	matches: 169
-	subfolders searched: 33
-	files searched: 253
+	skipped
 
 
 
 DOAMDB (98)
+	skipped
 
 
 
 FRR-MO (99)
-	matches: 215
-	subfolders searched: 71
-	files searched: 154
+	skipped
 
 
 
 appSB_%20CCRAccSys_FeedFile (100)
-	subfolders searched: 9
-	files searched: 3
+	skipped
 
 
 
 ciao-batch-processes (101)
-	matches: 15
-	subfolders searched: 67
-	files searched: 110
+	skipped
 
 
 
 TradeVaultCommon (102)
-	matches: 20
-	subfolders searched: 13
-	files searched: 63
+	skipped
 
 
 
 InfohubTradeSearchService (103)
-	matches: 53
-	subfolders searched: 27
-	files searched: 103
+	skipped
 
 
 
 ciao-document-generation (104)
-	matches: 1917
-	subfolders searched: 60
-	files searched: 126
+	skipped
 
 
 
 ciao-java11-s2i (105)
-	subfolders searched: 2
-	files searched: 5
+	skipped
 
 
 
 DB_DFCR (106)
-	matches: 84
-	subfolders searched: 3
-	files searched: 17
+	skipped
 
 
 
 ciao-rule-management-service (107)
-	matches: 156
-	subfolders searched: 43
-	files searched: 77
+	skipped
 
 
 
 FRRCollateralAndMargin (108)
-	matches: 15
-	subfolders searched: 18
-	files searched: 52
+	skipped
 
 
 
 DFCR (109)
-	matches: 81
-	subfolders searched: 23
-	files searched: 62
+	skipped
 
 
 
 EDW_ArchiveService (110)
+	skipped
 
 
 
 DealNominationPubService (111)
-	matches: 3
-	subfolders searched: 12
-	files searched: 33
+	skipped
 
 
 
 ciao-audit-listeners (112)
-	subfolders searched: 12
-	files searched: 7
+	skipped
 
 
 
 gas-flow-database (113)
+	skipped
 
 
 
 ciao-trade-service (114)
-	matches: 388
-	subfolders searched: 62
-	files searched: 154
+	skipped
 
 
 
 ciao-view-service (115)
-	subfolders searched: 42
-	files searched: 72
+	skipped
 
 
 
 ciao-ods-service (116)
-	matches: 27
-	subfolders searched: 39
-	files searched: 60
+	skipped
 
 
 
 ciao-dealmatch-service (117)
-	matches: 77
-	subfolders searched: 41
-	files searched: 56
+	skipped
 
 
 
 ciao-eleox-pair-quarkus (118)
+	skipped
 
 
 
 FRRDashboard (119)
-	matches: 4400
-	subfolders searched: 122
-	files searched: 733
+	skipped
 
 
 
 ansible_ccr_portal_services (120)
-	subfolders searched: 17
-	files searched: 24
+	skipped
 
 
 
 ciao-commons-bom (121)
-	matches: 5
-	files searched: 3
+	skipped
 
 
 
@@ -780,498 +611,407 @@ adap_etpub-calratevalue (122)
 
 
 ODSDataService (123)
-	matches: 107
-	subfolders searched: 17
-	files searched: 51
+	skipped
 
 
 
 StonebranchJobs (124)
+	skipped
 
 
 
 InfohubPortfolioOutboundService (125)
+	skipped
 
 
 
 Temp_POC_DotNet (126)
+	skipped
 
 
 
 ansible_ccr_stonebranch (127)
-	subfolders searched: 17
-	files searched: 24
+	skipped
 
 
 
 SMM-Client (128)
-	matches: 6
-	subfolders searched: 12
-	files searched: 41
+	skipped
 
 
 
 RSPOSITIONSTGDB (129)
-	matches: 66
-	subfolders searched: 3
-	files searched: 7
+	skipped
 
 
 
 ciao-startstop-scaling (130)
+	skipped
 
 
 
 Dummy (131)
-	files searched: 1
+	skipped
 
 
 
 CAM-CloudAssetManager (132)
-	matches: 60
-	subfolders searched: 28
-	files searched: 335
+	skipped
 
 
 
 PowerShellScripts (133)
-	subfolders searched: 14
-	files searched: 7
+	skipped
 
 
 
 ansible_nagp_eod_regreporting (134)
-	matches: 9
-	subfolders searched: 31
-	files searched: 179
+	skipped
 
 
 
 DB_IMNA (135)
+	skipped
 
 
 
 ciao-message-bridge (136)
-	subfolders searched: 9
-	files searched: 11
+	skipped
 
 
 
 FRR-ARTT (137)
-	matches: 1
-	subfolders searched: 6
-	files searched: 28
+	skipped
 
 
 
 appWS_DS_DealHistoryService (138)
-	subfolders searched: 5
-	files searched: 15
+	skipped
 
 
 
 OCR (139)
-	matches: 2
-	subfolders searched: 20
-	files searched: 91
+	skipped
 
 
 
 appWS_DS_MetadataLookupService (140)
-	subfolders searched: 3
-	files searched: 13
+	skipped
 
 
 
 appWS_DS_DocumentFaxService (141)
-	subfolders searched: 3
-	files searched: 10
+	skipped
 
 
 
 ciao-uber-kjar-operator (142)
+	skipped
 
 
 
 appWS_DS_InvoiceAlertService (143)
-	subfolders searched: 4
-	files searched: 10
+	skipped
 
 
 
 ciao-node-bff (144)
-	matches: 199
-	subfolders searched: 11
-	files searched: 59
+	skipped
 
 
 
 ciao-soapui-utils (145)
-	matches: 1698
-	subfolders searched: 19
-	files searched: 36
+	skipped
 
 
 
 DataService (146)
-	subfolders searched: 4
-	files searched: 10
+	skipped
 
 
 
 ciao-openshift-imagestreams (147)
-	subfolders searched: 1
-	files searched: 2
+	skipped
 
 
 
 ciao-special-handling-kjar (148)
-	subfolders searched: 14
-	files searched: 11
+	skipped
 
 
 
 appWS_FYI_CurveFetchService (149)
-	matches: 4
-	subfolders searched: 15
-	files searched: 47
+	skipped
 
 
 
 DB_ECON (150)
+	skipped
 
 
 
 ciao-auto-scaling (151)
-	matches: 3
-	subfolders searched: 4
-	files searched: 14
+	skipped
 
 
 
 appWS_DS_MetadataWriterService (152)
-	subfolders searched: 5
-	files searched: 25
+	skipped
 
 
 
 ECONDB (153)
+	skipped
 
 
 
 appWS_CCR_Common (154)
-	matches: 20
-	subfolders searched: 46
-	files searched: 126
+	skipped
 
 
 
 ciao-pam7-operator (155)
+	skipped
 
 
 
 ciao-release (156)
-	matches: 30
-	subfolders searched: 9
-	files searched: 50
+	skipped
 
 
 
 ciao-amq7-operator (157)
+	skipped
 
 
 
 ciao-monitoring-operator (158)
-	matches: 1
-	subfolders searched: 6
-	files searched: 43
+	skipped
 
 
 
 ciao-bpm-db (159)
-	subfolders searched: 12
-	files searched: 14
+	skipped
 
 
 
 OTCFlatFileGeneration (160)
-	matches: 2
-	subfolders searched: 16
-	files searched: 47
+	skipped
 
 
 
 ciao-outbound-processor (161)
-	matches: 19
-	subfolders searched: 31
-	files searched: 56
+	skipped
 
 
 
 FRR-ARTT-Client (162)
+	skipped
 
 
 
 ciao-ods-ddl (163)
-	matches: 349
-	subfolders searched: 26
-	files searched: 171
+	skipped
 
 
 
 ODSPortal (164)
-	matches: 2291
-	subfolders searched: 123
-	files searched: 634
+	skipped
 
 
 
 NMS-Framework (165)
-	matches: 7
-	subfolders searched: 9
-	files searched: 53
+	skipped
 
 
 
 InfohubPositionOutputService (166)
-	matches: 118
-	subfolders searched: 25
-	files searched: 129
+	skipped
 
 
 
 PRM (167)
-	matches: 422
-	subfolders searched: 31
-	files searched: 173
+	skipped
 
 
 
 ciao-commons-model (168)
-	matches: 23
-	subfolders searched: 157
-	files searched: 117
+	skipped
 
 
 
 ciao-docs (169)
-	matches: 56
-	subfolders searched: 11
-	files searched: 12
+	skipped
 
 
 
 appWS_DOA_DOAMService (170)
-	matches: 69
-	subfolders searched: 5
-	files searched: 12
+	skipped
 
 
 
 ciao-stp-kjar (171)
-	matches: 8
-	subfolders searched: 10
-	files searched: 14
+	skipped
 
 
 
 ciao-performance-tests (172)
-	matches: 71
-	subfolders searched: 26
-	files searched: 38
+	skipped
 
 
 
 appWS_DS_FirstOfMonthPricingService (173)
-	subfolders searched: 5
-	files searched: 15
+	skipped
 
 
 
 ciao-agent-bond (174)
-	subfolders searched: 51
-	files searched: 22
+	skipped
 
 
 
 TestAutomation_ErrorPortal (175)
-	subfolders searched: 3
-	files searched: 3
+	skipped
 
 
 
 FRRCommonTransformation (176)
-	matches: 2298
-	subfolders searched: 25
-	files searched: 314
+	skipped
 
 
 
 DFDM-New (177)
-	matches: 219
-	subfolders searched: 73
-	files searched: 330
+	skipped
 
 
 
 appSB_CCR_LTR (178)
-	matches: 3
-	subfolders searched: 12
-	files searched: 23
+	skipped
 
 
 
 SSRDB (179)
-	subfolders searched: 5
-	files searched: 5
+	skipped
 
 
 
 appWS_FYI_HeliosPlazaMapService (180)
-	subfolders searched: 4
-	files searched: 13
+	skipped
 
 
 
 FTH-Client (181)
+	skipped
 
 
 
 ErrorServicePublisher (182)
-	subfolders searched: 3
-	files searched: 12
+	skipped
 
 
 
 ciao-acceptance-tests (183)
-	matches: 128
-	subfolders searched: 15
-	files searched: 116
+	skipped
 
 
 
 ILSDB (184)
+	skipped
 
 
 
 ciao-uber-kjar (185)
-	matches: 7
-	subfolders searched: 13
-	files searched: 11
+	skipped
 
 
 
 CCR.Common (186)
+	skipped
 
 
 
 ciao-testing-kjars (187)
-	matches: 6
-	subfolders searched: 20
-	files searched: 16
+	skipped
 
 
 
 TradeVaultService (188)
-	matches: 166
-	subfolders searched: 37
-	files searched: 154
+	skipped
 
 
 
 TransportAgreementPubService (189)
-	subfolders searched: 9
-	files searched: 20
+	skipped
 
 
 
 TradePowerPubSub (190)
-	matches: 26
-	subfolders searched: 10
-	files searched: 28
+	skipped
 
 
 
 ciao-amq-perf-test (191)
-	subfolders searched: 1
-	files searched: 3
+	skipped
 
 
 
 ansible_nagp_appd_db_monitoring (192)
-	subfolders searched: 14
-	files searched: 28
+	skipped
 
 
 
 ciao-prometheus (193)
-	subfolders searched: 3
-	files searched: 10
+	skipped
 
 
 
 BTMEnrichmentService (194)
-	matches: 10
-	subfolders searched: 30
-	files searched: 86
+	skipped
 
 
 
 NGLReconService (195)
-	subfolders searched: 12
-	files searched: 28
+	skipped
 
 
 
 FRRInitialMargin (196)
-	matches: 280
-	subfolders searched: 23
-	files searched: 76
+	skipped
 
 
 
 ciao-data-service (197)
-	matches: 202
-	subfolders searched: 59
-	files searched: 123
+	skipped
 
 
 
 FTH-Web (198)
-	matches: 98
-	subfolders searched: 30
-	files searched: 108
+	skipped
 
 
 
 TradePowerBatchManagement (199)
-	matches: 2
-	subfolders searched: 3
-	files searched: 15
+	skipped
 
 
 
 CommonBinaries (200)
-	subfolders searched: 3
-	files searched: 3
+	skipped
 
 
 
 AntiMoneyLaunderingService (201)
-	files searched: 1
+	skipped
 
 
 
 ciao-ba-platform-parent (202)
-	matches: 5
-	subfolders searched: 1
-	files searched: 4
+	skipped
 
 
 
 ciao-kjar-cleanup (203)
-	subfolders searched: 25
-	files searched: 17
+	skipped
 
 
 
@@ -1281,116 +1021,87 @@ GlobalConfirmations (204)
 
 
 PTMDB (205)
-	subfolders searched: 5
-	files searched: 2
+	skipped
 
 
 
 NMS-AMQP-Framework (206)
-	subfolders searched: 8
-	files searched: 42
+	skipped
 
 
 
 TestAutomation_FRRFitPortal (207)
-	matches: 489
-	subfolders searched: 37
-	files searched: 211
+	skipped
 
 
 
 Global-ErrorPortal (208)
-	matches: 141
-	subfolders searched: 51
-	files searched: 298
+	skipped
 
 
 
 ansible_nagp_realtime_regreporting (209)
-	matches: 87
-	subfolders searched: 33
-	files searched: 206
+	skipped
 
 
 
 appWS_CS_ContactDataWriterService (210)
-	subfolders searched: 4
-	files searched: 15
+	skipped
 
 
 
 InfohubClientService (211)
-	matches: 235
-	subfolders searched: 39
-	files searched: 117
+	skipped
 
 
 
 ciao-inbound-docrouterservice (212)
-	subfolders searched: 26
-	files searched: 31
+	skipped
 
 
 
 ciao-rh-upgrade-ciao-pipelines (213)
-	matches: 5
-	subfolders searched: 4
-	files searched: 8
+	skipped
 
 
 
 UEHPublish (214)
-	matches: 153
-	subfolders searched: 3
-	files searched: 17
+	skipped
 
 
 
 ciao-amq7 (215)
-	matches: 1
-	subfolders searched: 5
-	files searched: 12
+	skipped
 
 
 
 CrossCommodityPortal (216)
-	matches: 222
-	subfolders searched: 95
-	files searched: 458
+	skipped
 
 
 
 EConfirmTransformationService (217)
-	matches: 2722
-	subfolders searched: 69
-	files searched: 561
+	skipped
 
 
 
 DOAM-Service (218)
-	matches: 69
-	subfolders searched: 12
-	files searched: 34
+	skipped
 
 
 
 OCPCreditPubService (219)
-	subfolders searched: 10
-	files searched: 28
+	skipped
 
 
 
 ciao-ui (220)
-	matches: 713
-	subfolders searched: 69
-	files searched: 269
+	skipped
 
 
 
 QUILTService (221)
-	matches: 26
-	subfolders searched: 26
-	files searched: 89
+	skipped
 
 
 
@@ -1402,28 +1113,22 @@ FRRPowerService (222)
 
 
 ansible_password_reset (223)
-	subfolders searched: 1
-	files searched: 1
+	skipped
 
 
 
 CO-Client (224)
-	matches: 46
-	subfolders searched: 39
-	files searched: 208
+	skipped
 
 
 
 appSB_CCR_SPADFDM (225)
-	subfolders searched: 6
-	files searched: 9
+	skipped
 
 
 
 appWS_DS_PipelineDataService (226)
-	matches: 3
-	subfolders searched: 3
-	files searched: 13
+	skipped
 
 
 
@@ -1433,75 +1138,67 @@ DB_ODS (227)
 
 
 ansible_nagp_btm (228)
-	subfolders searched: 18
-	files searched: 50
+	skipped
 
 
 
 ciao-java-s2i (229)
-	subfolders searched: 2
-	files searched: 5
+	skipped
 
 
 
 InfoHubBatchController (230)
+	skipped
 
 
 
 ciao-groups (231)
-	subfolders searched: 27
-	files searched: 12
+	skipped
 
 
 
 EIADB (232)
+	skipped
 
 
 
 gas-flow-client (233)
-	files searched: 1
+	skipped
 
 
 
 ccr_appsvc_security (234)
+	skipped
 
 
 
 CUSTOMER_INFO (235)
+	skipped
 
 
 
 Shared-CCR-Web (236)
-	subfolders searched: 16
-	files searched: 32
+	skipped
 
 
 
 conf-insights-consumer (237)
-	matches: 32
-	subfolders searched: 43
-	files searched: 119
+	skipped
 
 
 
 TradeVaultEODSvc (238)
-	matches: 1116
-	subfolders searched: 26
-	files searched: 86
+	skipped
 
 
 
 ciao-external-secrets-operator (239)
-	matches: 54
-	subfolders searched: 9
-	files searched: 45
+	skipped
 
 
 
 EnrichmentService (240)
-	matches: 1383
-	subfolders searched: 31
-	files searched: 151
+	skipped
 
 
 
@@ -1513,169 +1210,147 @@ FRR-Common (241)
 
 
 FRR-Web (242)
-	matches: 47
-	subfolders searched: 23
-	files searched: 73
+	skipped
 
 
 
 DbRoll (243)
+	skipped
 
 
 
 ciao-eleox-pair (244)
-	matches: 1
-	subfolders searched: 28
-	files searched: 36
+	skipped
 
 
 
 DB_CASPER (245)
+	skipped
 
 
 
 ansible_ocr (246)
-	subfolders searched: 15
-	files searched: 28
+	skipped
 
 
 
 OCRDB (247)
+	skipped
 
 
 
 PositionTransformationService (248)
-	matches: 204
-	subfolders searched: 21
-	files searched: 55
+	skipped
 
 
 
 TestAutomation_CCPortal (249)
-	matches: 206
-	subfolders searched: 37
-	files searched: 106
+	skipped
 
 
 
 gas-flow-web (250)
+	skipped
 
 
 
 TradeVaultRealtimeSvc (251)
-	matches: 49
-	subfolders searched: 25
-	files searched: 85
+	skipped
 
 
 
 ciao-sharepoint-service (252)
-	matches: 7
-	subfolders searched: 34
-	files searched: 60
+	skipped
 
 
 
 CCR-TradeSubmission (253)
+	skipped
 
 
 
 appWS_DS_OfficeLocatorDataService (254)
-	matches: 29
-	subfolders searched: 2
-	files searched: 9
+	skipped
 
 
 
 ciao-commons-model-bom (255)
-	matches: 5
-	files searched: 3
+	skipped
 
 
 
 InfohubPositionInputService (256)
-	matches: 224
-	subfolders searched: 19
-	files searched: 74
+	skipped
 
 
 
 EnterpriseLibraries (257)
+	skipped
 
 
 
 PETService (258)
+	skipped
 
 
 
 ciao-test-double (259)
-	matches: 12738
-	subfolders searched: 104
-	files searched: 395
+	skipped
 
 
 
 ciao-pam7-source (260)
+	skipped
 
 
 
 InfohubBusPartyService (261)
-	matches: 1
-	subfolders searched: 17
-	files searched: 41
+	skipped
 
 
 
 IMNADB (262)
-	subfolders searched: 3
-	files searched: 2
+	skipped
 
 
 
 appWS_CS_ContractDataLookupService (263)
-	subfolders searched: 4
-	files searched: 16
+	skipped
 
 
 
 appSB_CCR_OCR (264)
-	subfolders searched: 8
-	files searched: 14
+	skipped
 
 
 
 QUILTDB (265)
+	skipped
 
 
 
 PasswordResetTool (266)
-	subfolders searched: 6
-	files searched: 13
+	skipped
 
 
 
 LTRTranslationService (267)
-	matches: 3
-	subfolders searched: 12
-	files searched: 31
+	skipped
 
 
 
 appSB_Stonebranch_Common (268)
+	skipped
 
 
 
 CC-Client (269)
-	matches: 179
-	subfolders searched: 27
-	files searched: 116
+	skipped
 
 
 
 FRR-FTH (270)
-	matches: 1
-	subfolders searched: 7
-	files searched: 28
+	skipped
 
 
 
@@ -1687,16 +1362,12 @@ FRRNGLTransformationService (271)
 
 
 FRR-Client (272)
-	matches: 9
-	subfolders searched: 13
-	files searched: 44
+	skipped
 
 
 
 ansible_nagp_shared_services (273)
-	matches: 10
-	subfolders searched: 35
-	files searched: 221
+	skipped
 
 
 

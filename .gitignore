@@ -2,3 +2,4 @@ dev/
 logs/
 repos/
 saved/
+*.txt
