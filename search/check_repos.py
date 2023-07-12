@@ -16,6 +16,11 @@ from selenium import webdriver
 from bs4 import BeautifulSoup
 
 
+## TODO
+# move log file logic to python code
+# reference log file in results
+# avoid multiple open, close for results files
+
 
 # use batch file to run, create log
 
@@ -30,42 +35,37 @@ from bs4 import BeautifulSoup
 
 
 
-'''
-testing
-
-PRICE_VALUE - repos\FRR-Common
-FORMULA_COMPONENT - repos\FRR-Common
-HS_POSITION_SET - repos\InfohubPositionOutputService
-'''
-def test():
-    path = 'repos\FRR-Common'
-    write_repo_start(path, 1)
-    write_repo_details(search_repo(path))
-
-
-
 ADO_URL = 'https://dev.azure.com/bp-vsts/NAGPCCR/_apis/git/repositories?api-version=7.0'
 MAX_GIT_ATTEMPTS = 5
 RE_PATTERN_START = "(?<![a-z0-9_])"
 RE_PATTERN_END = "(?![a-z0-9_])"
 MAX_LINE_PREVIEW_LENGTH = 500
 
+INCLUDE_MODE, EXCLUDE_MODE = range(2)
+REPO_MODE = EXCLUDE_MODE
+
 REPOS_FOLDER = 'repos'
 REPOS_JSON = 'repos.json'
+LAST_UPDATED_FILE = 'last_updated.txt'
+
+INPUT_FOLDER = 'input'
 TABLE_NAMES_FILE = 'table_names.txt'
+INCLUDED_REPOS_FILE = 'included_repos.txt'
 EXCLUDED_REPOS_FILE = 'excluded_repos.txt'
 EXCLUDED_ENDINGS_FILE = 'excluded_endings.txt'
-LAST_UPDATED_FILE = 'last_updated.txt'
+EXCLUDED_DIRS_FILE = 'excluded_dirs.txt'
+
+OUTPUT_FOLDER = 'output'
 FULL_RESULTS_FILE = 'results.txt'
 SUMMARY_RESULTS_FILE = 'results_summary.txt'
 AFFECTED_TABLE_NAMES_FILE = 'affected.txt'
 
 table_names = []
 affected_table_names = set()
+included_repos = []
 excluded_repos = []
-excluded_dirs = [".git", "obj", "bin", "service references", "connected services"]
+excluded_dirs = []
 excluded_endings = []
-#logged_endings = ['.xls', '.xlsx', '.xlsm']
 last_update = {}
 encodings = ['default', 'utf-8', 'utf-16']
 
@@ -79,14 +79,15 @@ def search_repos():
 
         n_repos = repos_json['count']
         for count, i in enumerate(repos_json['value']):
-            repo_name = i['name'].replace(' ', '%20') # no spaces in repo name
+            repo_name = i['name'].lower().replace(' ', '%20') # no spaces in repo name
             repo_url = i['remoteUrl']
             repo_path = os.path.join(REPOS_FOLDER, repo_name)
 
             logger.info('repo %d/%d - %s - %s', count+1, n_repos, repo_name, repo_url)
             write_repo_start(repo_name, count+1)
 
-            if repo_name in excluded_repos:
+            if ((REPO_MODE == INCLUDE_MODE) and (repo_name not in included_repos)) or \
+                    ((REPO_MODE == EXCLUDE_MODE) and (repo_name in excluded_repos)):
                 logger.info('excluded from validation')
                 write_repo_skipped()
                 write_repo_end()
@@ -367,44 +368,40 @@ def create_repos_json():
 
 
 
-def read_table_names():
-    ''' reads table names for validation '''
-
-    with open(TABLE_NAMES_FILE, 'r', encoding="utf-8") as tables:
-        for line in tables.readlines():
-            line = line.strip()
-
-            if not line == "":
-                table_names.append(line.lower())
-
-
-
-def read_excluded_repo_names():
-    ''' reads excluded repos to skip validation '''
-
-    with open(EXCLUDED_REPOS_FILE, 'r', encoding="utf-8") as excluded_file:
-        for line in excluded_file.readlines():
-            line = line.strip()
-
-            if (not line.startswith("#")) and (not line == ""):
-                excluded_repos.append(line.replace(' ', '%20')) # no spaces in repo name
-
-
-
-def read_excluded_endings():
-    ''' reads excluded file endings from validation '''
-
-    with open(EXCLUDED_ENDINGS_FILE, 'r', encoding='utf-8') as excluded_ext_file:
-        for line in excluded_ext_file.readlines():
+def read_input_file(filename, critical=False):
+    path = os.path.join(INPUT_FOLDER, filename)
+    if not os.path.exists(path):
+        msg = f'{filename} does not exist'
+        if critical:
+            logger.critical(msg)
+            sys.exit()
+        else:
+            logger.warning(msg)
+            return []
+    
+    out = []
+    with open(path, 'r', encoding="utf-8") as file:
+        for line in file.readlines():
             line = line.strip().lower()
+            if (not line.startswith("#")) and (not line == ""):
+                out.append(line)
+    return out
 
-            if (not line.startswith('#')) and (not line == ""):
-                excluded_endings.append(line)
+
+
+def read_repo_names(filename):
+    
+    # no spaces in repo name
+    return [name.replace(' ', '%20') for name in read_input_file(filename)]
 
 
 
 def read_last_updated_info():
     ''' reads last updated info for repos '''
+
+    if not os.path.exists(LAST_UPDATED_FILE):
+        logger.warning(f'{LAST_UPDATED_FILE} does not exist')
+        return
 
     with open(LAST_UPDATED_FILE, 'r', encoding="utf-8") as update_file:
         for line in update_file.readlines():
@@ -423,19 +420,38 @@ def write_last_updated_info():
 
 
 def init_results_files():
-    ''' creates empty results files '''
+    ''' initializes results files '''
 
-    with open(FULL_RESULTS_FILE, 'w', encoding='utf-8') as file:
+    with open(os.path.join(OUTPUT_FOLDER, FULL_RESULTS_FILE), 'w', encoding='utf-8') as file:
+        file.write('=== CONFIG ===\n')
+        file.write(f'repo mode - {REPO_MODE}\n')
+        if REPO_MODE == INCLUDE_MODE:
+            file.write(format_config_section_string('included repos', included_repos))
+        else:
+            file.write(format_config_section_string('excluded repos', excluded_repos))
+
+        file.write(format_config_section_string('excluded endings', excluded_endings))
+        file.write(format_config_section_string('excluded dirs', excluded_dirs))
+        file.write(format_config_section_string('table names', table_names) + '\n\n')
+        file.write('=== REPOS ===\n')
+
+    with open(os.path.join(OUTPUT_FOLDER, SUMMARY_RESULTS_FILE), 'w', encoding='utf-8') as file:
         file.write('')
-    with open(SUMMARY_RESULTS_FILE, 'w', encoding='utf-8') as file:
-        file.write('')
+
+
+
+def format_config_section_string(st, lst):
+    out = f'{st}\n'
+    if len(lst) > 0:
+        out += '\t' + '\n\t'.join(lst) + '\n'
+    return out
 
 
 
 def write_full_results_line(line):
     ''' writes line to full results file '''
 
-    with open(FULL_RESULTS_FILE, 'a', encoding='utf-8') as file:
+    with open(os.path.join(OUTPUT_FOLDER, FULL_RESULTS_FILE), 'a', encoding='utf-8') as file:
         file.write(line + '\n')
 
 
@@ -443,7 +459,7 @@ def write_full_results_line(line):
 def write_summary_results_line(line):
     ''' writes line to summary results file '''
 
-    with open(SUMMARY_RESULTS_FILE, 'a', encoding='utf-8') as file:
+    with open(os.path.join(OUTPUT_FOLDER, SUMMARY_RESULTS_FILE), 'a', encoding='utf-8') as file:
         file.write(line + '\n')
 
 
@@ -516,7 +532,7 @@ def write_repo_end():
 
 def write_affected_tables():
     sorted_affected_table_names = sorted(affected_table_names)
-    with open(AFFECTED_TABLE_NAMES_FILE, 'w', encoding='utf-8') as file:
+    with open(os.path.join(OUTPUT_FOLDER, AFFECTED_TABLE_NAMES_FILE), 'w', encoding='utf-8') as file:
         for name in sorted_affected_table_names:
             file.write(name + '\n')
 
@@ -524,23 +540,30 @@ def write_affected_tables():
 
 def main():
     ''' driver for validation process '''
+    
+    global REPO_MODE, table_names 
+    global included_repos, excluded_repos, excluded_endings, excluded_dirs
+
+    if sys.argv[1] == "include":
+        REPO_MODE = INCLUDE_MODE
 
     if not os.path.isfile(REPOS_JSON):
         create_repos_json()
 
-    if not os.path.isfile(TABLE_NAMES_FILE):
-        logger.critical('table names not given')
-        sys.exit()
-    read_table_names()
+    table_names = read_input_file(TABLE_NAMES_FILE, critical=True)
 
-    if os.path.isfile(EXCLUDED_REPOS_FILE):
-        read_excluded_repo_names()
+    if REPO_MODE == INCLUDE_MODE:
+        included_repos = read_repo_names(INCLUDED_REPOS_FILE)
+    else:
+        excluded_repos = read_repo_names(EXCLUDED_REPOS_FILE)
 
-    if os.path.isfile(EXCLUDED_ENDINGS_FILE):
-        read_excluded_endings()
+    excluded_endings = read_input_file(EXCLUDED_ENDINGS_FILE)
+    excluded_dirs = read_input_file(EXCLUDED_DIRS_FILE)
 
-    if os.path.isfile(LAST_UPDATED_FILE):
-        read_last_updated_info()
+    read_last_updated_info()
+
+    if not os.path.exists(OUTPUT_FOLDER):
+        os.mkdir(OUTPUT_FOLDER)
 
     init_results_files()
     search_repos()
