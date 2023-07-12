@@ -1,7 +1,6 @@
-dev/
 logs/
 repos/
-saved/
+input/
 *.txt
-ODS_DEPENDECY_DETAILS.xlsx
-repos.json
+*.xlsx
+*.json
