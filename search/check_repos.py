@@ -40,6 +40,7 @@ MAX_GIT_ATTEMPTS = 5
 RE_PATTERN_START = "(?<![a-z0-9_])"
 RE_PATTERN_END = "(?![a-z0-9_])"
 MAX_LINE_PREVIEW_LENGTH = 500
+DAY_IN_SECONDS = 86400
 
 INCLUDE_MODE, EXCLUDE_MODE = range(2)
 REPO_MODE = EXCLUDE_MODE
@@ -116,7 +117,7 @@ def update_repo(name, path, url=None):
             logger.error('no upstream branch - empty repo?')
             return False
 
-        if (name not in last_update) or (time.time() - last_update[name] > 86400): # 1 day
+        if (name not in last_update) or (time.time() - last_update[name] > DAY_IN_SECONDS):
             return update_repo_core(name, path, 'pull')
 
         logger.info('last update less than 1 day ago - skipping pull')
@@ -349,6 +350,26 @@ def decode_file(path):
 
 
 
+def check_repos_json():
+    if not os.path.exists(REPOS_JSON):
+        return False
+
+    with open(REPOS_JSON, 'r', encoding="utf-8") as json_file:
+        repos_json = json.loads(''.join(json_file.readlines()))
+
+        try:
+            dtm = float(repos_json['dtm'])
+        except ValueError:
+            logger.warning('json update dtm could not be converted to float')
+            return False
+        except KeyError:
+            logger.error('json does not contain dtm')
+            return False
+        
+        return time.time() - dtm < DAY_IN_SECONDS
+
+
+
 def create_repos_json():
     ''' gets repos list using API, persists in json '''
 
@@ -361,10 +382,12 @@ def create_repos_json():
     driver.close()
     for pre_tag in body.find_all('pre'):
         pre_tag.unwrap()
-    body_content = body.contents
+
+    json_dict = json.loads(body.contents[0])
+    json_dict["dtm"] = time.time()
 
     with open(REPOS_JSON, 'w', encoding="utf-8") as json_file:
-        json_file.write(body_content[0])
+        json.dump(json_dict, json_file, indent=4)
 
 
 
@@ -547,7 +570,7 @@ def main():
     if sys.argv[1] == "include":
         REPO_MODE = INCLUDE_MODE
 
-    if not os.path.isfile(REPOS_JSON):
+    if not check_repos_json():
         create_repos_json()
 
     table_names = read_input_file(TABLE_NAMES_FILE, critical=True)
