@@ -11,15 +11,10 @@ import datetime
 
 import openpyxl     # xlsm, xlsx
 import xlrd         # xls
-import chardet
 import git
 from selenium import webdriver
 from bs4 import BeautifulSoup
 
-
-## TODO
-# consider regex options
-# user options
 
 
 """
@@ -49,7 +44,7 @@ INPUT_FOLDER = 'input'
 SEARCH_WORDS_FILENAME = 'words.txt'
 INCLUDED_REPOS_FILENAME = 'included_repos.txt'
 EXCLUDED_REPOS_FILENAME = 'excluded_repos.txt'
-EXCLUDED_ENDINGS_FILENAME = 'excluded_endings.txt'
+EXCLUDED_FILES_FILENAME = 'excluded_files.txt'
 EXCLUDED_FOLDERS_FILENAME = 'excluded_folders.txt'
 
 OUTPUT_FOLDER = 'output'
@@ -61,22 +56,21 @@ FOUND_WORDS_FILENAME = 'found_words.txt'
 
 ADO_URL = 'https://dev.azure.com/bp-vsts/NAGPCCR/_apis/git/repositories?api-version=7.0'
 MAX_GIT_ATTEMPTS = 5
-RE_PATTERN_START = "(?<![a-z0-9_])"
-RE_PATTERN_END = "(?![a-z0-9_])"
+RE_PATTERN = "(?<![a-z0-9_]){}(?![a-z0-9_])"
 MAX_LINE_PREVIEW_LENGTH = 1000
 DAY_IN_SECONDS = 86400
 
 INCLUDE_MODE, EXCLUDE_MODE = range(2)
-REPO_MODE = 0
+REPO_MODE = EXCLUDE_MODE
+SEARCH_EXCEL_FILES = False
 
 search_words = []
 found_words = set()
 included_repos = []
 excluded_repos = []
 excluded_folders = []
-excluded_endings = []
+excluded_files = []
 last_update = {}
-encodings = ['default', 'utf-8', 'utf-16']
 
 
 
@@ -118,6 +112,7 @@ def search_repo(repo_folder):
 
     matches = {}
     errors = []
+    skipped = []
     searched_subfolders = []
     searched_files = []
 
@@ -132,25 +127,31 @@ def search_repo(repo_folder):
 
         searched_subfolders += [os.path.join(root, dir) for dir in dirs]
 
-        files[:] = [file for file in files if not file.lower().endswith(tuple(excluded_endings))]
+        files[:] = [file for file in files if not file.lower().endswith(tuple(excluded_files))]
 
         for file in files:
             path = os.path.join(root, file)
             logger.info(path)
 
             if path.endswith('.xls'):
-                search_legacy_spreadsheet_file(path, matches)
-                searched_files.append(path)
+                if not SEARCH_EXCEL_FILES:
+                    skipped.append(path)
+                else:
+                    search_legacy_spreadsheet_file(path, matches)
+                    searched_files.append(path)
             elif path.endswith(tuple(['.xlsm', '.xlsx'])):
-                search_spreadsheet_file(path, matches)
-                searched_files.append(path)
+                if not SEARCH_EXCEL_FILES:
+                    skipped.append(path)
+                else:
+                    search_spreadsheet_file(path, matches)
+                    searched_files.append(path)
             else:
                 if search_file(path, matches):
                     searched_files.append(path)
                 else:
                     errors.append(path)
 
-    return (errors, matches, searched_subfolders, searched_files)
+    return (errors, skipped, matches, searched_subfolders, searched_files)
 
 
 
@@ -160,8 +161,7 @@ def search_legacy_spreadsheet_file(path, matches):
     workbook = xlrd.open_workbook(path)
 
     for search_word in search_words:
-        pattern = RE_PATTERN_START + search_word + RE_PATTERN_END
-
+        pattern = RE_PATTERN.format(search_word)
         for sheet in workbook.sheets():
             for n_row in range(sheet.nrows):
                 for n_col in range(sheet.ncols):
@@ -173,13 +173,11 @@ def search_legacy_spreadsheet_file(path, matches):
 def search_spreadsheet_file(path, matches):
     ''' searches xlsx/xlsm file for search words '''
 
-    warnings.simplefilter(action='ignore', category=UserWarning)
-
+    #warnings.simplefilter(action='ignore', category=UserWarning)
     workbook = openpyxl.load_workbook(path, read_only=True)
 
     for search_word in search_words:
-        pattern = RE_PATTERN_START + search_word + RE_PATTERN_END
-
+        pattern = RE_PATTERN.format(search_word)
         for sheet in workbook.worksheets:
             for n_row, row in enumerate(sheet.iter_rows()):
                 for n_col, cell in enumerate(row):
@@ -219,8 +217,7 @@ def search_file(path, matches):
     lines = decoding_result[1]
 
     for search_word in search_words:
-        pattern = RE_PATTERN_START + search_word + RE_PATTERN_END
-
+        pattern = RE_PATTERN.format(search_word)
         for line_num, line in enumerate(lines):
             line = line.lower().strip()
             if re.search(pattern, line):
@@ -239,44 +236,19 @@ def search_file(path, matches):
 def decode_file(path):
     ''' decodes file for reading '''
 
-    for encoding in encodings:
-        try:
-            if encoding == 'default':
-                with open(path, 'r') as cur_file: # intentionally didn't specify encoding
-                    lines = [line.lower() for line in cur_file.readlines()]
-            else:
-                with open(path, 'r', encoding=encoding) as cur_file:
-                    lines = [line.lower() for line in cur_file.readlines()]
-
-            logger.info('decoding success using %s', encoding)
-            return (True, lines)
-
-        except FileNotFoundError:
-            logger.error('file not found')
-            return (False,)
-
-        except (UnicodeDecodeError, UnicodeError):
-            pass
-
-
-    with open(path, 'rb') as binary_file:
-        data = binary_file.read()
-
-    encoding = chardet.detect(data)['encoding']
-
-    if encoding is None:
-        logger.error('decoding failure type 1')
-        return (False,)
-
     try:
-        with open(path, 'r', encoding=encoding) as cur_file:
+        with open(path, 'r', encoding='utf-8', errors='ignore') as cur_file:
             lines = [line.lower() for line in cur_file.readlines()]
 
-        logger.info('decoding success using %s', encoding)
+        logger.info('decoding success')
         return (True, lines)
 
+    except FileNotFoundError:
+        logger.error('file not found - path probably too long')
+        return (False,)
+
     except (UnicodeDecodeError, UnicodeError):
-        logger.error('decoding failure type 2')
+        logger.error(f'decoding failure')
         return (False,)
 
 
@@ -393,7 +365,7 @@ def create_repos_json():
     driver = webdriver.Chrome()
     driver.get(ADO_URL)
 
-    input() # press enter once loaded
+    input('press enter after json response has loaded')
 
     body = BeautifulSoup(driver.page_source, 'html.parser').body
     driver.close()
@@ -411,11 +383,19 @@ def create_repos_json():
 def set_repo_mode():
     ''' sets repo mode from user input '''
     global REPO_MODE
-    if input('enter repo mode (include - i / I, exclude - anything else): ') in ('i', 'I'):
+    print('repo mode options')
+    print('\tinclude - i / I')
+    print('\texclude - default')
+    if input('make selection: ') in ('i', 'I'):
         REPO_MODE = INCLUDE_MODE
-        return
-    REPO_MODE = EXCLUDE_MODE
 
+
+
+def set_search_excel():
+    ''' sets whether to search Excel files from user input '''
+    global SEARCH_EXCEL_FILES
+    if input('search Excel spreadsheets? (y/Y for yes): ') in ('y', 'Y'):
+        SEARCH_EXCEL_FILES = True
 
 
 def read_input_file(filename, critical=False):
@@ -477,7 +457,7 @@ def init_results_files():
         f'repo mode - {REPO_MODE}',
         format_config_section('included repos', included_repos) if REPO_MODE == INCLUDE_MODE else\
             format_config_section('excluded repos', excluded_repos),
-        format_config_section('excluded endings', excluded_endings),
+        format_config_section('excluded files', excluded_files),
         format_config_section('excluded dirs', excluded_folders),
         format_config_section('search words', search_words) + '\n',
         '=== REPOS ==='
@@ -523,7 +503,7 @@ def write_repo_skipped():
 def write_repo_details(details):
     ''' writes repo validation details to results files '''
 
-    errors, matches, searched_subfolders, searched_files = details
+    errors, skipped, matches, searched_subfolders, searched_files = details
 
     if len(matches) > 0:
         count = 0
@@ -538,25 +518,32 @@ def write_repo_details(details):
                     count += 1
 
         write_summary_results_line(f'\tmatches: {count}')
+    
+    if len(skipped) > 0:
+        write_full_results_line('\tskipped:')
+        for skip in skipped:
+            write_full_results_line(f'\t\t{skip}')
+        
+        write_summary_results_line(f'\tskipped: {len(skipped)}')
 
     if len(errors) > 0:
         write_full_results_line('\terrors:')
         for error in errors:
-            write_full_results_line('\t\t' + error)
+            write_full_results_line(f'\t\t{error}')
 
         write_summary_results_line(f'\terrors: {len(errors)}')
 
     if len(searched_subfolders) > 0:
         write_full_results_line('\tsubfolders searched:')
         for folder in searched_subfolders:
-            write_full_results_line('\t\t' + folder)
+            write_full_results_line(f'\t\t{folder}')
 
         write_summary_results_line(f'\tsubfolders searched: {len(searched_subfolders)}')
 
     if len(searched_files) > 0:
         write_full_results_line('\tfiles searched:')
         for file in searched_files:
-            write_full_results_line('\t\t' + file)
+            write_full_results_line(f'\t\t{file}')
 
         write_summary_results_line(f'\tfiles searched: {len(searched_files)}')
 
@@ -602,9 +589,10 @@ def close_results_files():
 def main():
     ''' driver for validation process '''
 
-    global search_words, included_repos, excluded_repos, excluded_endings, excluded_folders
+    global search_words, included_repos, excluded_repos, excluded_files, excluded_folders
 
     set_repo_mode()
+    set_search_excel()
 
     if not check_repos_json():
         create_repos_json()
@@ -616,7 +604,7 @@ def main():
     else:
         excluded_repos = read_repo_names(EXCLUDED_REPOS_FILENAME)
 
-    excluded_endings = read_input_file(EXCLUDED_ENDINGS_FILENAME)
+    excluded_files = read_input_file(EXCLUDED_FILES_FILENAME)
     excluded_folders = read_input_file(EXCLUDED_FOLDERS_FILENAME)
 
     read_last_updated_info()
