@@ -7,9 +7,10 @@ import json
 import logging
 import re
 import warnings
+import datetime
 
 import openpyxl     # xlsm, xlsx
-import xlrd         # for xls
+import xlrd         # xls
 import chardet
 import git
 from selenium import webdriver
@@ -17,33 +18,25 @@ from bs4 import BeautifulSoup
 
 
 ## TODO
-# move log file logic to python code
-# reference log file in results
 # avoid multiple open, close for results files
+# generalize wording for keywords other than table names
+# consider regex options
 
 
-# use batch file to run, create log
+"""
+handled errors
 
-# logged errors
-    # no upstream branch
-        # empty repo
-        # skips pull
-    # max retry for clone / pull
-    # decoding failure
-    # file not found
-        # path too long (>260)
+no upstream branch
+    empty repo
+max retry for clone / pull
+file not found
+    path too long (>260)
+decoding failure
+"""
 
 
 
-ADO_URL = 'https://dev.azure.com/bp-vsts/NAGPCCR/_apis/git/repositories?api-version=7.0'
-MAX_GIT_ATTEMPTS = 5
-RE_PATTERN_START = "(?<![a-z0-9_])"
-RE_PATTERN_END = "(?![a-z0-9_])"
-MAX_LINE_PREVIEW_LENGTH = 500
-DAY_IN_SECONDS = 86400
-
-INCLUDE_MODE, EXCLUDE_MODE = range(2)
-REPO_MODE = EXCLUDE_MODE
+LOGS_FOLDER = 'logs'
 
 REPOS_FOLDER = 'repos'
 REPOS_JSON = 'repos.json'
@@ -60,6 +53,16 @@ OUTPUT_FOLDER = 'output'
 FULL_RESULTS_FILE = 'results.txt'
 SUMMARY_RESULTS_FILE = 'results_summary.txt'
 AFFECTED_TABLE_NAMES_FILE = 'affected.txt'
+
+ADO_URL = 'https://dev.azure.com/bp-vsts/NAGPCCR/_apis/git/repositories?api-version=7.0'
+MAX_GIT_ATTEMPTS = 5
+RE_PATTERN_START = "(?<![a-z0-9_])"
+RE_PATTERN_END = "(?![a-z0-9_])"
+MAX_LINE_PREVIEW_LENGTH = 500
+DAY_IN_SECONDS = 86400
+
+INCLUDE_MODE, EXCLUDE_MODE = range(2)
+REPO_MODE = 0
 
 table_names = []
 affected_table_names = set()
@@ -85,6 +88,7 @@ def search_repos():
             repo_path = os.path.join(REPOS_FOLDER, repo_name)
 
             logger.info('repo %d/%d - %s - %s', count+1, n_repos, repo_name, repo_url)
+            print(f'searching repo {count+1}/{n_repos} - {repo_name}')
             write_repo_start(repo_name, count+1)
 
             if ((REPO_MODE == INCLUDE_MODE) and (repo_name not in included_repos)) or \
@@ -96,7 +100,6 @@ def search_repos():
 
             if update_repo(repo_name, repo_path, repo_url):
                 write_repo_details(search_repo(repo_path))
-
             else:
                 logger.info('skipping search')
                 write_repo_skipped()
@@ -447,6 +450,7 @@ def init_results_files():
 
     with open(os.path.join(OUTPUT_FOLDER, FULL_RESULTS_FILE), 'w', encoding='utf-8') as file:
         file.write('=== CONFIG ===\n')
+        file.write(f'log file - {LOGFILE}\n')
         file.write(f'repo mode - {REPO_MODE}\n')
         if REPO_MODE == INCLUDE_MODE:
             file.write(format_config_section_string('included repos', included_repos))
@@ -561,14 +565,21 @@ def write_affected_tables():
 
 
 
+def set_repo_mode():
+    global REPO_MODE
+    if input('enter repo mode (include - i / I, exclude - anything else): ') in ('i', 'I'):
+        REPO_MODE = INCLUDE_MODE
+        return
+    REPO_MODE = EXCLUDE_MODE
+
+    
+
 def main():
     ''' driver for validation process '''
     
-    global REPO_MODE, table_names 
-    global included_repos, excluded_repos, excluded_endings, excluded_dirs
+    global table_names, included_repos, excluded_repos, excluded_endings, excluded_dirs
 
-    if sys.argv[1] == "include":
-        REPO_MODE = INCLUDE_MODE
+    set_repo_mode()
 
     if not check_repos_json():
         create_repos_json()
@@ -596,9 +607,17 @@ def main():
 
 
 if __name__ == "__main__":
+    NOW = datetime.datetime.now().strftime("%m-%d-%Y_%H-%M-%S")
+    LOGFILE = f'log_{NOW}.txt'
+
+    if not os.path.exists(LOGS_FOLDER):
+        os.mkdir(LOGS_FOLDER)
+
     logging.basicConfig(
         level=logging.DEBUG,
-        format='%(asctime)s - LOGGING.%(levelname)s - %(message)s'
+        format='%(asctime)s - LOGGING.%(levelname)s - %(message)s',
+        filename=os.path.join(LOGS_FOLDER, LOGFILE),
+        filemode='a'
     )
     logger = logging.getLogger(__name__)
 
