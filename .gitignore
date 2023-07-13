@@ -1,6 +1,8 @@
 logs/
 repos/
 input/
+output/
 *.txt
 *.xlsx
 *.json
+.DS_Store
