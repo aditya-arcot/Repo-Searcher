@@ -1,4 +1,4 @@
-''' checks ADO repos for mentions of tables marked for deletion '''
+''' searches ADO repos for occurrences of given words '''
 
 import os
 import sys
@@ -43,8 +43,8 @@ decoding failure
 LOGS_FOLDER = 'logs'
 
 REPOS_FOLDER = 'repos'
-REPOS_JSON = 'repos.json'
-LAST_UPDATED_FILE = 'last_updated.txt'
+REPOS_JSON = 'repos_info.json'
+LAST_UPDATED_FILE = 'repos_last_update.txt'
 
 INPUT_FOLDER = 'input'
 TABLE_NAMES_FILE = 'table_names.txt'
@@ -504,7 +504,7 @@ def close_results_files():
     FULL_RESULTS_FILE.close()
     SUMMARY_RESULTS_FILE.close()
 
-    
+
 
 def write_repo_start(name, num):
     ''' writes repo start info to results files '''
@@ -617,6 +617,7 @@ def main():
     init_results_files()
     search_repos()
     close_results_files()
+
     write_last_updated_info()
     write_affected_tables()
 
