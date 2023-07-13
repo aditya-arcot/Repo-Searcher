@@ -97,7 +97,7 @@ def search_repos():
             write_repo_start(repo_name, count+1)
 
             if ((REPO_MODE == INCLUDE_MODE) and (repo_name not in included_repos)) or \
-                    ((REPO_MODE == EXCLUDE_MODE) and (repo_name in excluded_repos)):
+                ((REPO_MODE == EXCLUDE_MODE) and (repo_name in excluded_repos)):
                 logger.info('excluded from validation')
                 write_repo_skipped()
                 write_repo_end()
@@ -110,75 +110,6 @@ def search_repos():
                 write_repo_skipped()
 
             write_repo_end()
-
-
-
-def update_repo(name, path, url=None):
-    ''' updates repo local files '''
-
-    if os.path.exists(path):
-        logger.info('repo path already exists')
-
-        try:
-            git.Repo(path).git.rev_parse('@{upstream}') # look for upstream
-        except git.GitCommandError:
-            logger.error('no upstream branch - empty repo?')
-            return False
-
-        if (name not in last_update) or (time.time() - last_update[name] > DAY_IN_SECONDS):
-            return update_repo_core(name, path, 'pull')
-
-        logger.info('last update less than 1 day ago - skipping pull')
-        return True
-
-    logger.info('repo path does not exist')
-    return update_repo_core(name, path, 'clone', url)
-
-
-
-def update_repo_core(name, path, mode, url=None):
-    ''' main logic for repo local files update '''
-
-    attempts = 0
-
-    while attempts < MAX_GIT_ATTEMPTS:
-        if mode == 'pull':
-            if attempt_git_command(path, 'pull'): # success
-                break
-        else:
-            if attempt_git_command(path, 'clone', url): # success
-                break
-        attempts += 1
-        logger.info('trying again in 2 seconds')
-        time.sleep(2)
-
-    if attempts == MAX_GIT_ATTEMPTS:
-        if mode == 'pull':
-            logger.error('max retries for repo pull - skipping')
-        else:
-            logger.error('max retries for repo clone - skipping')
-        return False
-
-    last_update[name] = time.time()
-    return True
-
-
-
-def attempt_git_command(path, mode, url=None):
-    ''' attempts clone or pull and returns status '''
-
-    try:
-        if mode == 'clone':
-            git.Repo.clone_from(url, path)
-            logger.info('clone successful')
-        else:
-            logger.info(git.Repo(path).git.pull())
-            logger.info('pull successful')
-        return True
-
-    except git.GitCommandError as err:
-        logger.error(f'{mode} failed - %s', err)
-        return False
 
 
 
@@ -252,7 +183,8 @@ def search_spreadsheet_file(path, matches):
         for sheet in workbook.worksheets:
             for n_row, row in enumerate(sheet.iter_rows()):
                 for n_col, cell in enumerate(row):
-                    search_cell(cell, pattern, sheet.title, n_row, n_col, matches, path, search_word)
+                    search_cell(cell, pattern, sheet.title, n_row, n_col, \
+                                matches, path, search_word)
 
     warnings.resetwarnings()
 
@@ -304,21 +236,6 @@ def search_file(path, matches):
 
 
 
-def add_new_match(matches, path, search_word, note):
-    ''' adds new match to dictionary '''
-
-    if not path in matches:
-        matches[path] = {}
-
-    if not search_word in matches[path]:
-        matches[path][search_word] = []
-
-    matches[path][search_word].append(note)
-
-    found_words.add(search_word)
-
-
-
 def decode_file(path):
     ''' decodes file for reading '''
 
@@ -364,6 +281,90 @@ def decode_file(path):
 
 
 
+def add_new_match(matches, path, search_word, note):
+    ''' adds new match to dictionary '''
+
+    if not path in matches:
+        matches[path] = {}
+
+    if not search_word in matches[path]:
+        matches[path][search_word] = []
+
+    matches[path][search_word].append(note)
+
+    found_words.add(search_word)
+
+
+
+def update_repo(name, path, url=None):
+    ''' updates repo local files '''
+
+    if os.path.exists(path):
+        logger.info('repo path already exists')
+
+        try:
+            git.Repo(path).git.rev_parse('@{upstream}') # look for upstream
+        except git.GitCommandError:
+            logger.error('no upstream branch - empty repo?')
+            return False
+
+        if (name not in last_update) or (time.time() - last_update[name] > DAY_IN_SECONDS):
+            return update_repo_core(name, path, 'pull')
+
+        logger.info('last update less than 1 day ago - skipping pull')
+        return True
+
+    logger.info('repo path does not exist')
+    return update_repo_core(name, path, 'clone', url)
+
+
+
+def update_repo_core(name, path, mode, url=None):
+    ''' main logic for repo local files update '''
+
+    attempts = 0
+
+    while attempts < MAX_GIT_ATTEMPTS:
+        if mode == 'pull':
+            if attempt_git_command(path, 'pull'): # success
+                break
+        else:
+            if attempt_git_command(path, 'clone', url): # success
+                break
+        attempts += 1
+        logger.info('trying again in 2 seconds')
+        time.sleep(2)
+
+    if attempts == MAX_GIT_ATTEMPTS:
+        if mode == 'pull':
+            logger.error('max retries for repo pull - skipping')
+        else:
+            logger.error('max retries for repo clone - skipping')
+        return False
+
+    last_update[name] = time.time()
+    return True
+
+
+
+def attempt_git_command(path, mode, url=None):
+    ''' attempts clone or pull and returns status '''
+
+    try:
+        if mode == 'clone':
+            git.Repo.clone_from(url, path)
+            logger.info('clone successful')
+        else:
+            logger.info(git.Repo(path).git.pull())
+            logger.info('pull successful')
+        return True
+
+    except git.GitCommandError as err:
+        logger.error('%s failed - %s', mode, err)
+        return False
+
+
+
 def check_repos_json():
     ''' checks for valid repos info json'''
 
@@ -381,7 +382,7 @@ def check_repos_json():
         except KeyError:
             logger.error('json does not contain dtm')
             return False
-        
+
         return time.time() - dtm < DAY_IN_SECONDS
 
 
@@ -407,6 +408,16 @@ def create_repos_json():
 
 
 
+def set_repo_mode():
+    ''' sets repo mode from user input '''
+    global REPO_MODE
+    if input('enter repo mode (include - i / I, exclude - anything else): ') in ('i', 'I'):
+        REPO_MODE = INCLUDE_MODE
+        return
+    REPO_MODE = EXCLUDE_MODE
+
+
+
 def read_input_file(filename, critical=False):
     ''' checks for input file, returns lines '''
 
@@ -419,7 +430,7 @@ def read_input_file(filename, critical=False):
         else:
             logger.warning(msg)
             return []
-    
+
     out = []
     with open(path, 'r', encoding="utf-8") as file:
         for line in file.readlines():
@@ -440,7 +451,7 @@ def read_last_updated_info():
     ''' reads last updated info for repos '''
 
     if not os.path.exists(LAST_UPDATED_FILENAME):
-        logger.warning(f'{LAST_UPDATED_FILENAME} does not exist')
+        logger.warning('%s does not exist', LAST_UPDATED_FILENAME)
         return
 
     with open(LAST_UPDATED_FILENAME, 'r', encoding="utf-8") as update_file:
@@ -450,21 +461,15 @@ def read_last_updated_info():
 
 
 
-def write_last_updated_info():
-    ''' writes last updated info for repos '''
-    with open(LAST_UPDATED_FILENAME, 'w', encoding="utf-8") as update_file:
-        for repo, update_time in last_update.items():
-            update_file.write(repo + '\t' + str(update_time) + '\n')
-
-
-
 def init_results_files():
     ''' initializes results files '''
 
     global FULL_RESULTS_FILE, SUMMARY_RESULTS_FILE
 
-    FULL_RESULTS_FILE = open(os.path.join(OUTPUT_FOLDER, FULL_RESULTS_FILENAME), 'w', encoding='utf-8')
-    SUMMARY_RESULTS_FILE = open(os.path.join(OUTPUT_FOLDER, SUMMARY_RESULTS_FILENAME), 'w', encoding='utf-8')
+    FULL_RESULTS_FILE = open(os.path.join(OUTPUT_FOLDER, FULL_RESULTS_FILENAME), \
+                             'w', encoding='utf-8')
+    SUMMARY_RESULTS_FILE = open(os.path.join(OUTPUT_FOLDER, SUMMARY_RESULTS_FILENAME), \
+                                'w', encoding='utf-8')
 
     lines = [
         '=== CONFIG ===',
@@ -484,34 +489,20 @@ def init_results_files():
 
 
 
-def format_config_section(st, lst):
+def format_config_section(start, lst):
     ''' formats config section into output string '''
-    out = f'{st}'
+    out = f'{start}'
     if len(lst) > 0:
         out += '\n\t' + '\n\t'.join(lst)
     return out
 
 
 
-def write_full_results_line(line):
-    ''' writes line to full results file '''
-    FULL_RESULTS_FILE.write(line + '\n')
-    FULL_RESULTS_FILE.flush()
-
-
-
-
-def write_summary_results_line(line):
-    ''' writes line to summary results file '''
-    SUMMARY_RESULTS_FILE.write(line + '\n')
-    SUMMARY_RESULTS_FILE.flush()
-
-
-
-def close_results_files():
-    ''' closes results files '''
-    FULL_RESULTS_FILE.close()
-    SUMMARY_RESULTS_FILE.close()
+def write_last_updated_info():
+    ''' writes last updated info for repos '''
+    with open(LAST_UPDATED_FILENAME, 'w', encoding="utf-8") as update_file:
+        for repo, update_time in last_update.items():
+            update_file.write(repo + '\t' + str(update_time) + '\n')
 
 
 
@@ -586,19 +577,31 @@ def write_found_words():
 
 
 
-def set_repo_mode():
-    ''' sets repo mode from user input '''
-    global REPO_MODE
-    if input('enter repo mode (include - i / I, exclude - anything else): ') in ('i', 'I'):
-        REPO_MODE = INCLUDE_MODE
-        return
-    REPO_MODE = EXCLUDE_MODE
+def write_full_results_line(line):
+    ''' writes line to full results file '''
+    FULL_RESULTS_FILE.write(line + '\n')
+    FULL_RESULTS_FILE.flush()
 
-    
+
+
+
+def write_summary_results_line(line):
+    ''' writes line to summary results file '''
+    SUMMARY_RESULTS_FILE.write(line + '\n')
+    SUMMARY_RESULTS_FILE.flush()
+
+
+
+def close_results_files():
+    ''' closes results files '''
+    FULL_RESULTS_FILE.close()
+    SUMMARY_RESULTS_FILE.close()
+
+
 
 def main():
     ''' driver for validation process '''
-    
+
     global search_words, included_repos, excluded_repos, excluded_endings, excluded_folders
 
     set_repo_mode()
