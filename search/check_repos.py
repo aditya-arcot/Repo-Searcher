@@ -18,9 +18,9 @@ from bs4 import BeautifulSoup
 
 
 ## TODO
-# avoid multiple open, close for results files
 # generalize wording for keywords other than table names
 # consider regex options
+# user options
 
 
 """
@@ -28,10 +28,14 @@ handled errors
 
 no upstream branch
     empty repo
+    resolution - skip repo
 max retry for clone / pull
+    resolution - skip repo
 file not found
     path too long (>260)
+    resolution - skip file
 decoding failure
+    resolution - skip file
 """
 
 
@@ -50,8 +54,10 @@ EXCLUDED_ENDINGS_FILE = 'excluded_endings.txt'
 EXCLUDED_DIRS_FILE = 'excluded_dirs.txt'
 
 OUTPUT_FOLDER = 'output'
-FULL_RESULTS_FILE = 'results.txt'
-SUMMARY_RESULTS_FILE = 'results_summary.txt'
+FULL_RESULTS_FILENAME = 'results.txt'
+FULL_RESULTS_FILE = ''
+SUMMARY_RESULTS_FILENAME = 'results_summary.txt'
+SUMMARY_RESULTS_FILE = ''
 AFFECTED_TABLE_NAMES_FILE = 'affected.txt'
 
 ADO_URL = 'https://dev.azure.com/bp-vsts/NAGPCCR/_apis/git/repositories?api-version=7.0'
@@ -448,48 +454,57 @@ def write_last_updated_info():
 def init_results_files():
     ''' initializes results files '''
 
-    with open(os.path.join(OUTPUT_FOLDER, FULL_RESULTS_FILE), 'w', encoding='utf-8') as file:
-        file.write('=== CONFIG ===\n')
-        file.write(f'log file - {LOGFILE}\n')
-        file.write(f'repo mode - {REPO_MODE}\n')
-        if REPO_MODE == INCLUDE_MODE:
-            file.write(format_config_section_string('included repos', included_repos))
-        else:
-            file.write(format_config_section_string('excluded repos', excluded_repos))
+    global FULL_RESULTS_FILE, SUMMARY_RESULTS_FILE
 
-        file.write(format_config_section_string('excluded endings', excluded_endings))
-        file.write(format_config_section_string('excluded dirs', excluded_dirs))
-        file.write(format_config_section_string('table names', table_names) + '\n\n')
-        file.write('=== REPOS ===\n')
+    FULL_RESULTS_FILE = open(os.path.join(OUTPUT_FOLDER, FULL_RESULTS_FILENAME), 'w', encoding='utf-8')
+    SUMMARY_RESULTS_FILE = open(os.path.join(OUTPUT_FOLDER, SUMMARY_RESULTS_FILENAME), 'w', encoding='utf-8')
 
-    with open(os.path.join(OUTPUT_FOLDER, SUMMARY_RESULTS_FILE), 'w', encoding='utf-8') as file:
-        file.write('')
+    lines = [
+        '=== CONFIG ===',
+        f'log file - {LOGFILE}',
+        f'repo mode - {REPO_MODE}',
+        format_config_section_string('included repos', included_repos) if REPO_MODE == INCLUDE_MODE else\
+            format_config_section_string('excluded repos', excluded_repos),
+        format_config_section_string('excluded endings', excluded_endings),
+        format_config_section_string('excluded dirs', excluded_dirs),
+        format_config_section_string('table names', table_names) + '\n',
+        '=== REPOS ==='
+    ]
+    for line in lines:
+        write_full_results_line(line)
+
+    SUMMARY_RESULTS_FILE.write('')
 
 
 
 def format_config_section_string(st, lst):
     out = f'{st}\n'
     if len(lst) > 0:
-        out += '\t' + '\n\t'.join(lst) + '\n'
+        out += '\t' + '\n\t'.join(lst)
     return out
 
 
 
 def write_full_results_line(line):
     ''' writes line to full results file '''
+    FULL_RESULTS_FILE.write(line + '\n')
+    FULL_RESULTS_FILE.flush()
 
-    with open(os.path.join(OUTPUT_FOLDER, FULL_RESULTS_FILE), 'a', encoding='utf-8') as file:
-        file.write(line + '\n')
 
 
 
 def write_summary_results_line(line):
     ''' writes line to summary results file '''
+    SUMMARY_RESULTS_FILE.write(line + '\n')
+    SUMMARY_RESULTS_FILE.flush()
 
-    with open(os.path.join(OUTPUT_FOLDER, SUMMARY_RESULTS_FILE), 'a', encoding='utf-8') as file:
-        file.write(line + '\n')
 
 
+def close_results_files():
+    FULL_RESULTS_FILE.close()
+    SUMMARY_RESULTS_FILE.close()
+
+    
 
 def write_repo_start(name, num):
     ''' writes repo start info to results files '''
@@ -601,6 +616,7 @@ def main():
 
     init_results_files()
     search_repos()
+    close_results_files()
     write_last_updated_info()
     write_affected_tables()
 
