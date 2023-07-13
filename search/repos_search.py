@@ -18,7 +18,6 @@ from bs4 import BeautifulSoup
 
 
 ## TODO
-# generalize wording for keywords other than table names
 # consider regex options
 # user options
 
@@ -44,37 +43,37 @@ LOGS_FOLDER = 'logs'
 
 REPOS_FOLDER = 'repos'
 REPOS_JSON = 'repos_info.json'
-LAST_UPDATED_FILE = 'repos_last_update.txt'
+LAST_UPDATED_FILENAME = 'repos_last_update.txt'
 
 INPUT_FOLDER = 'input'
-TABLE_NAMES_FILE = 'table_names.txt'
-INCLUDED_REPOS_FILE = 'included_repos.txt'
-EXCLUDED_REPOS_FILE = 'excluded_repos.txt'
-EXCLUDED_ENDINGS_FILE = 'excluded_endings.txt'
-EXCLUDED_DIRS_FILE = 'excluded_dirs.txt'
+SEARCH_WORDS_FILENAME = 'words.txt'
+INCLUDED_REPOS_FILENAME = 'included_repos.txt'
+EXCLUDED_REPOS_FILENAME = 'excluded_repos.txt'
+EXCLUDED_ENDINGS_FILENAME = 'excluded_endings.txt'
+EXCLUDED_FOLDERS_FILENAME = 'excluded_folders.txt'
 
 OUTPUT_FOLDER = 'output'
 FULL_RESULTS_FILENAME = 'results.txt'
 FULL_RESULTS_FILE = ''
 SUMMARY_RESULTS_FILENAME = 'results_summary.txt'
 SUMMARY_RESULTS_FILE = ''
-AFFECTED_TABLE_NAMES_FILE = 'affected.txt'
+FOUND_WORDS_FILENAME = 'found_words.txt'
 
 ADO_URL = 'https://dev.azure.com/bp-vsts/NAGPCCR/_apis/git/repositories?api-version=7.0'
 MAX_GIT_ATTEMPTS = 5
 RE_PATTERN_START = "(?<![a-z0-9_])"
 RE_PATTERN_END = "(?![a-z0-9_])"
-MAX_LINE_PREVIEW_LENGTH = 500
+MAX_LINE_PREVIEW_LENGTH = 1000
 DAY_IN_SECONDS = 86400
 
 INCLUDE_MODE, EXCLUDE_MODE = range(2)
 REPO_MODE = 0
 
-table_names = []
-affected_table_names = set()
+search_words = []
+found_words = set()
 included_repos = []
 excluded_repos = []
-excluded_dirs = []
+excluded_folders = []
 excluded_endings = []
 last_update = {}
 encodings = ['default', 'utf-8', 'utf-16']
@@ -82,7 +81,7 @@ encodings = ['default', 'utf-8', 'utf-16']
 
 
 def search_repos():
-    ''' checks repos for occurrences of table names '''
+    ''' searches repos for occurrences of search words '''
 
     with open(REPOS_JSON, 'r', encoding="utf-8") as json_file:
         repos_json = json.loads(''.join(json_file.readlines()))
@@ -104,9 +103,9 @@ def search_repos():
                 write_repo_end()
                 continue
 
-            if update_repo(repo_name, repo_path, repo_url):
+            if update_repo(repo_name, repo_path, repo_url): # update unnecessary or successful
                 write_repo_details(search_repo(repo_path))
-            else:
+            else: # update failed
                 logger.info('skipping search')
                 write_repo_skipped()
 
@@ -138,16 +137,16 @@ def update_repo(name, path, url=None):
 
 
 def update_repo_core(name, path, mode, url=None):
-    ''' main logic for repo local file update '''
+    ''' main logic for repo local files update '''
 
     attempts = 0
 
     while attempts < MAX_GIT_ATTEMPTS:
         if mode == 'pull':
-            if attempt_git_command(path, 'pull'):
+            if attempt_git_command(path, 'pull'): # success
                 break
         else:
-            if attempt_git_command(path, 'clone', url):
+            if attempt_git_command(path, 'clone', url): # success
                 break
         attempts += 1
         logger.info('trying again in 2 seconds')
@@ -178,16 +177,13 @@ def attempt_git_command(path, mode, url=None):
         return True
 
     except git.GitCommandError as err:
-        if mode == 'clone':
-            logger.error('clone failed - %s', err)
-        else:
-            logger.error('pull failed - %s', err)
+        logger.error(f'{mode} failed - %s', err)
         return False
 
 
 
 def search_repo(repo_folder):
-    ''' checks repo files for occurrences of table names '''
+    ''' checks repo files for occurrences of search words '''
 
     matches = {}
     errors = []
@@ -195,7 +191,8 @@ def search_repo(repo_folder):
     searched_files = []
 
     for root, dirs, files in os.walk(repo_folder):
-        dirs[:] = [_dir for _dir in dirs if _dir.lower() not in excluded_dirs]
+        # removed excluded folders
+        dirs[:] = [_dir for _dir in dirs if _dir.lower() not in excluded_folders]
 
         # only remove if .sln file exists
         if 'packages' in dirs:
@@ -227,37 +224,43 @@ def search_repo(repo_folder):
 
 
 def search_legacy_spreadsheet_file(path, matches):
+    ''' searches xls file for search words '''
+
     workbook = xlrd.open_workbook(path)
 
-    for table_name in table_names:
-        pattern = RE_PATTERN_START + table_name + RE_PATTERN_END
+    for search_word in search_words:
+        pattern = RE_PATTERN_START + search_word + RE_PATTERN_END
 
         for sheet in workbook.sheets():
             for n_row in range(sheet.nrows):
                 for n_col in range(sheet.ncols):
                     cell = sheet.cell(n_row, n_col)
-                    search_cell(cell, pattern, sheet.name, n_row, n_col, matches, path, table_name)
+                    search_cell(cell, pattern, sheet.name, n_row, n_col, matches, path, search_word)
 
 
 
 def search_spreadsheet_file(path, matches):
+    ''' searches xlsx/xlsm file for search words '''
+
     warnings.simplefilter(action='ignore', category=UserWarning)
 
     workbook = openpyxl.load_workbook(path, read_only=True)
 
-    for table_name in table_names:
-        pattern = RE_PATTERN_START + table_name + RE_PATTERN_END
+    for search_word in search_words:
+        pattern = RE_PATTERN_START + search_word + RE_PATTERN_END
 
         for sheet in workbook.worksheets:
             for n_row, row in enumerate(sheet.iter_rows()):
                 for n_col, cell in enumerate(row):
-                    search_cell(cell, pattern, sheet.title, n_row, n_col, matches, path, table_name)
+                    search_cell(cell, pattern, sheet.title, n_row, n_col, matches, path, search_word)
 
     warnings.resetwarnings()
 
 
 
-def search_cell(cell, pattern, sheet_name, n_row, n_col, matches, path, table_name):
+def search_cell(cell, pattern, sheet_name, n_row, n_col, matches, path, search_word):
+    ''' searches spreadsheet cell for search word '''
+
     if not cell.value:
         return
 
@@ -269,13 +272,13 @@ def search_cell(cell, pattern, sheet_name, n_row, n_col, matches, path, table_na
 
         log_string = f'sheet {sheet_name} row {n_row} col {n_col} - {val}'
 
-        logger.info('match - %s - %s', table_name, log_string)
-        add_new_match(matches, path, table_name, log_string)
+        logger.info('match - %s - %s', search_word, log_string)
+        add_new_match(matches, path, search_word, log_string)
 
 
 
 def search_file(path, matches):
-    ''' checks file for occurrences of table names '''
+    ''' searches file for search words '''
 
     decoding_result = decode_file(path)
     if not decoding_result[0]:
@@ -283,8 +286,8 @@ def search_file(path, matches):
 
     lines = decoding_result[1]
 
-    for table_name in table_names:
-        pattern = RE_PATTERN_START + table_name + RE_PATTERN_END
+    for search_word in search_words:
+        pattern = RE_PATTERN_START + search_word + RE_PATTERN_END
 
         for line_num, line in enumerate(lines):
             line = line.lower().strip()
@@ -294,23 +297,25 @@ def search_file(path, matches):
 
                 log_string = f'line {line_num} - {line}'
 
-                logger.info('match - %s - %s', table_name, log_string)
-                add_new_match(matches, path, table_name, log_string)
+                logger.info('match - %s - %s', search_word, log_string)
+                add_new_match(matches, path, search_word, log_string)
 
     return True
 
 
 
-def add_new_match(matches, path, table_name, note):
+def add_new_match(matches, path, search_word, note):
+    ''' adds new match to dictionary '''
+
     if not path in matches:
         matches[path] = {}
 
-    if not table_name in matches[path]:
-        matches[path][table_name] = []
+    if not search_word in matches[path]:
+        matches[path][search_word] = []
 
-    matches[path][table_name].append(note)
+    matches[path][search_word].append(note)
 
-    affected_table_names.add(table_name)
+    found_words.add(search_word)
 
 
 
@@ -360,6 +365,8 @@ def decode_file(path):
 
 
 def check_repos_json():
+    ''' checks for valid repos info json'''
+
     if not os.path.exists(REPOS_JSON):
         return False
 
@@ -380,7 +387,7 @@ def check_repos_json():
 
 
 def create_repos_json():
-    ''' gets repos list using API, persists in json '''
+    ''' gets repo details, persists in json '''
 
     driver = webdriver.Chrome()
     driver.get(ADO_URL)
@@ -401,6 +408,8 @@ def create_repos_json():
 
 
 def read_input_file(filename, critical=False):
+    ''' checks for input file, returns lines '''
+
     path = os.path.join(INPUT_FOLDER, filename)
     if not os.path.exists(path):
         msg = f'{filename} does not exist'
@@ -422,8 +431,7 @@ def read_input_file(filename, critical=False):
 
 
 def read_repo_names(filename):
-    
-    # no spaces in repo name
+    ''' returns formatted repo names '''
     return [name.replace(' ', '%20') for name in read_input_file(filename)]
 
 
@@ -431,11 +439,11 @@ def read_repo_names(filename):
 def read_last_updated_info():
     ''' reads last updated info for repos '''
 
-    if not os.path.exists(LAST_UPDATED_FILE):
-        logger.warning(f'{LAST_UPDATED_FILE} does not exist')
+    if not os.path.exists(LAST_UPDATED_FILENAME):
+        logger.warning(f'{LAST_UPDATED_FILENAME} does not exist')
         return
 
-    with open(LAST_UPDATED_FILE, 'r', encoding="utf-8") as update_file:
+    with open(LAST_UPDATED_FILENAME, 'r', encoding="utf-8") as update_file:
         for line in update_file.readlines():
             split = line.strip().split('\t')
             last_update[split[0]] = float(split[1])
@@ -444,8 +452,7 @@ def read_last_updated_info():
 
 def write_last_updated_info():
     ''' writes last updated info for repos '''
-
-    with open(LAST_UPDATED_FILE, 'w', encoding="utf-8") as update_file:
+    with open(LAST_UPDATED_FILENAME, 'w', encoding="utf-8") as update_file:
         for repo, update_time in last_update.items():
             update_file.write(repo + '\t' + str(update_time) + '\n')
 
@@ -463,11 +470,11 @@ def init_results_files():
         '=== CONFIG ===',
         f'log file - {LOGFILE}',
         f'repo mode - {REPO_MODE}',
-        format_config_section_string('included repos', included_repos) if REPO_MODE == INCLUDE_MODE else\
-            format_config_section_string('excluded repos', excluded_repos),
-        format_config_section_string('excluded endings', excluded_endings),
-        format_config_section_string('excluded dirs', excluded_dirs),
-        format_config_section_string('table names', table_names) + '\n',
+        format_config_section('included repos', included_repos) if REPO_MODE == INCLUDE_MODE else\
+            format_config_section('excluded repos', excluded_repos),
+        format_config_section('excluded endings', excluded_endings),
+        format_config_section('excluded dirs', excluded_folders),
+        format_config_section('search words', search_words) + '\n',
         '=== REPOS ==='
     ]
     for line in lines:
@@ -477,10 +484,11 @@ def init_results_files():
 
 
 
-def format_config_section_string(st, lst):
-    out = f'{st}\n'
+def format_config_section(st, lst):
+    ''' formats config section into output string '''
+    out = f'{st}'
     if len(lst) > 0:
-        out += '\t' + '\n\t'.join(lst)
+        out += '\n\t' + '\n\t'.join(lst)
     return out
 
 
@@ -501,6 +509,7 @@ def write_summary_results_line(line):
 
 
 def close_results_files():
+    ''' closes results files '''
     FULL_RESULTS_FILE.close()
     SUMMARY_RESULTS_FILE.close()
 
@@ -508,7 +517,6 @@ def close_results_files():
 
 def write_repo_start(name, num):
     ''' writes repo start info to results files '''
-
     write_full_results_line(name + f' ({num})')
     write_summary_results_line(name + f' ({num})')
 
@@ -516,7 +524,6 @@ def write_repo_start(name, num):
 
 def write_repo_skipped():
     ''' writes repo skipped to results files '''
-
     write_full_results_line('\tskipped')
     write_summary_results_line('\tskipped')
 
@@ -533,9 +540,9 @@ def write_repo_details(details):
         write_full_results_line('\tmatches:')
         for path in matches.keys():
             write_full_results_line(f'\t\t{path}')
-            for table_name in matches[path].keys():
-                write_full_results_line(f'\t\t\t{table_name}')
-                for match in matches[path][table_name]:
+            for search_word in matches[path].keys():
+                write_full_results_line(f'\t\t\t{search_word}')
+                for match in matches[path][search_word]:
                     write_full_results_line(f'\t\t\t\t{match}')
                     count += 1
 
@@ -566,21 +573,21 @@ def write_repo_details(details):
 
 def write_repo_end():
     ''' writes repo end to results files '''
-
     write_full_results_line('\n\n')
     write_summary_results_line('\n\n')
 
 
 
-def write_affected_tables():
-    sorted_affected_table_names = sorted(affected_table_names)
-    with open(os.path.join(OUTPUT_FOLDER, AFFECTED_TABLE_NAMES_FILE), 'w', encoding='utf-8') as file:
-        for name in sorted_affected_table_names:
+def write_found_words():
+    ''' writes found search words to file '''
+    with open(os.path.join(OUTPUT_FOLDER, FOUND_WORDS_FILENAME), 'w', encoding='utf-8') as file:
+        for name in sorted(found_words):
             file.write(name + '\n')
 
 
 
 def set_repo_mode():
+    ''' sets repo mode from user input '''
     global REPO_MODE
     if input('enter repo mode (include - i / I, exclude - anything else): ') in ('i', 'I'):
         REPO_MODE = INCLUDE_MODE
@@ -592,22 +599,22 @@ def set_repo_mode():
 def main():
     ''' driver for validation process '''
     
-    global table_names, included_repos, excluded_repos, excluded_endings, excluded_dirs
+    global search_words, included_repos, excluded_repos, excluded_endings, excluded_folders
 
     set_repo_mode()
 
     if not check_repos_json():
         create_repos_json()
 
-    table_names = read_input_file(TABLE_NAMES_FILE, critical=True)
+    search_words = read_input_file(SEARCH_WORDS_FILENAME, critical=True)
 
     if REPO_MODE == INCLUDE_MODE:
-        included_repos = read_repo_names(INCLUDED_REPOS_FILE)
+        included_repos = read_repo_names(INCLUDED_REPOS_FILENAME)
     else:
-        excluded_repos = read_repo_names(EXCLUDED_REPOS_FILE)
+        excluded_repos = read_repo_names(EXCLUDED_REPOS_FILENAME)
 
-    excluded_endings = read_input_file(EXCLUDED_ENDINGS_FILE)
-    excluded_dirs = read_input_file(EXCLUDED_DIRS_FILE)
+    excluded_endings = read_input_file(EXCLUDED_ENDINGS_FILENAME)
+    excluded_folders = read_input_file(EXCLUDED_FOLDERS_FILENAME)
 
     read_last_updated_info()
 
@@ -619,7 +626,7 @@ def main():
     close_results_files()
 
     write_last_updated_info()
-    write_affected_tables()
+    write_found_words()
 
 
 
