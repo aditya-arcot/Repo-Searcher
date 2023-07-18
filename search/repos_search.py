@@ -248,7 +248,7 @@ def decode_file(path):
         return (False,)
 
     except (UnicodeDecodeError, UnicodeError):
-        logger.error(f'decoding failure')
+        logger.error('decoding failure')
         return (False,)
 
 
@@ -518,12 +518,12 @@ def write_repo_details(details):
                     count += 1
 
         write_summary_results_line(f'\tmatches: {count}')
-    
+
     if len(skipped) > 0:
         write_full_results_line('\tskipped:')
         for skip in skipped:
             write_full_results_line(f'\t\t{skip}')
-        
+
         write_summary_results_line(f'\tskipped: {len(skipped)}')
 
     if len(errors) > 0:
