@@ -8,6 +8,7 @@ import logging
 import re
 import warnings
 import datetime
+import requests
 
 import openpyxl     # xlsm, xlsx
 import xlrd         # xls
@@ -46,6 +47,7 @@ INCLUDED_REPOS_FILENAME = 'included_repos.txt'
 EXCLUDED_REPOS_FILENAME = 'excluded_repos.txt'
 EXCLUDED_FILES_FILENAME = 'excluded_files.txt'
 EXCLUDED_FOLDERS_FILENAME = 'excluded_folders.txt'
+PAT_FILE = 'PAT.txt'
 
 OUTPUT_FOLDER = 'output'
 FULL_RESULTS_FILENAME = 'results.txt'
@@ -54,7 +56,8 @@ SUMMARY_RESULTS_FILENAME = 'results_summary.txt'
 SUMMARY_RESULTS_FILE = ''
 FOUND_WORDS_FILENAME = 'found_words.txt'
 
-ADO_URL = 'https://dev.azure.com/bp-vsts/NAGPCCR/_apis/git/repositories?api-version=7.0'
+PAT = ''
+GET_REPOS_URL = 'https://dev.azure.com/bp-vsts/NAGPCCR/_apis/git/repositories?api-version=7.0'
 MAX_GIT_ATTEMPTS = 5
 RE_PATTERN = "(?<![a-z0-9_]){}(?![a-z0-9_])"
 MAX_LINE_PREVIEW_LENGTH = 1000
@@ -337,46 +340,18 @@ def attempt_git_command(path, mode, url=None):
 
 
 
-def check_repos_json():
-    ''' checks for valid repos info json'''
-
-    if not os.path.exists(REPOS_JSON):
-        return False
-
-    with open(REPOS_JSON, 'r', encoding="utf-8") as json_file:
-        repos_json = json.loads(''.join(json_file.readlines()))
-
-        try:
-            dtm = float(repos_json['dtm'])
-        except ValueError:
-            logger.warning('json update dtm could not be converted to float')
-            return False
-        except KeyError:
-            logger.error('json does not contain dtm')
-            return False
-
-        return time.time() - dtm < DAY_IN_SECONDS
-
-
-
 def create_repos_json():
     ''' gets repo details, persists in json '''
 
-    driver = webdriver.Chrome()
-    driver.get(ADO_URL)
+    try:
+        resp = requests.get(GET_REPOS_URL, auth=('user', PAT))
+        
+        with open(REPOS_JSON, 'w', encoding='utf-8') as json_file:
+            json.dump(resp.json(), json_file, indent=4)
 
-    input('press enter after json response has loaded')
-
-    body = BeautifulSoup(driver.page_source, 'html.parser').body
-    driver.close()
-    for pre_tag in body.find_all('pre'):
-        pre_tag.unwrap()
-
-    json_dict = json.loads(body.contents[0])
-    json_dict["dtm"] = time.time()
-
-    with open(REPOS_JSON, 'w', encoding="utf-8") as json_file:
-        json.dump(json_dict, json_file, indent=4)
+    except requests.exceptions.JSONDecodeError:
+        logger.critical('error parsing repos json info')
+        sys.exit()
 
 
 
@@ -589,13 +564,18 @@ def close_results_files():
 def main():
     ''' driver for validation process '''
 
-    global search_words, included_repos, excluded_repos, excluded_files, excluded_folders
+    global search_words, included_repos, excluded_repos, excluded_files, excluded_folders, PAT
 
     set_repo_mode()
     set_search_excel()
 
-    if not check_repos_json():
-        create_repos_json()
+    try:
+        PAT = read_input_file(PAT_FILE, critical=True)[0]
+    except IndexError:
+        logger.critical('PAT not given')
+        sys.exit()
+    
+    create_repos_json()
 
     search_words = read_input_file(SEARCH_WORDS_FILENAME, critical=True)
 
