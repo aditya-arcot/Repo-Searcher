@@ -1,0 +1,6 @@
+.git
+.vs
+obj
+bin
+service references
+connected services
