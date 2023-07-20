@@ -1,8 +1,13 @@
+__pycache__/
 logs/
 repos/
-input/
 output/
-*.txt
+
+.DS_Store
+
 *.xlsx
 *.json
-.DS_Store
+search/input/PAT.txt
+search/input/included_repos.txt
+search/input/words.txt
+search/repos_last_update.txt
