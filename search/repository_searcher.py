@@ -46,6 +46,7 @@ class RepositorySearcher:
     def __init_writer(self):
         self.writer = ResultsWriter(self.logger)
         self.writer.write_config(RepoModeEnum(self.repo_mode).name, self.config)
+        self.writer.flush()
 
     def __create_repos_json(self):
         # https://learn.microsoft.com/en-us/rest/api/azure/devops/git/repositories/list?view=azure-devops-rest-7.0
@@ -72,7 +73,7 @@ class RepositorySearcher:
 
                 if repo.update(): # update unnecessary or successful
                     details = self.__search_repo(repo)
-                    self.writer.write_repo_details(details)
+                    self.writer.write_repo_results(details)
                 else:
                     self.__skip_repo('update unsuccessful')
 
@@ -121,22 +122,23 @@ class RepositorySearcher:
         search_results = RepoSearchResults()
 
         for root, dirs, files in os.walk(repo.path):
-            skipped_dirs = [_dir for _dir in dirs if _dir.lower() in \
-                            self.config.get(ConfigEnum.EXCLUDED_FOLDERS.name)]
-            skipped_files = [file for file in files if file.lower() not in \
-                             self.config.get(ConfigEnum.EXCLUDED_FILES.name)]
-            search_results.skipped += skipped_dirs
-            search_results.skipped += skipped_files
+            excluded_folders = self.config.get(ConfigEnum.EXCLUDED_FOLDERS.name)
+            excluded_files = self.config.get(ConfigEnum.EXCLUDED_FILES.name)
 
-            dirs[:] = [_dir for _dir in dirs if _dir.lower() not in \
-                       self.config.get(ConfigEnum.EXCLUDED_FOLDERS.name)]
-            files[:] = [file for file in files if file.lower() not in \
-                        self.config.get(ConfigEnum.EXCLUDED_FILES.name)]
+            skipped_dirs = [_dir + os.sep for _dir in dirs if _dir.lower() in excluded_folders]
+            skipped_files = [os.path.join(root, file) for file in files if \
+                             file.lower().endswith(tuple(excluded_files))]
+
+            search_results.skipped_folders += skipped_dirs
+            search_results.skipped_files += skipped_files
+
+            dirs[:] = [_dir + os.sep for _dir in dirs if _dir.lower() not in excluded_folders]
+            files[:] = [os.path.join(root, file) for file in files if not \
+                        file.lower().endswith(tuple(excluded_files))]
             
-            search_results.subfolders += [os.path.join(root, dir) for dir in dirs]
+            search_results.folders += [os.path.join(root, dir) for dir in dirs]
 
-            for file in files:
-                path = os.path.join(root, file)
+            for path in files:
                 logger.info(f'file - {path}', stdout=False)
                 self.__search_for_file(path, search_results)
 
@@ -145,8 +147,9 @@ class RepositorySearcher:
     def __search_for_file(self, path, search_results:RepoSearchResults):
         if path.endswith(tuple(['.xls', '.xlsm', '.xlsx'])):
             if not self.search_excel:
-                search_results.skipped.append(path)
+                search_results.skipped_files.append(path)
             else:
+                search_results.files.append(path)
                 if path.endswith('.xls'):
                     self.__search_legacy_spreadsheet_file(path, search_results.matches)
                 else:
@@ -209,6 +212,7 @@ class RepositorySearcher:
             with open(path, 'r', encoding='utf-8', errors='ignore') as cur_file:
                 lines = [line.lower() for line in cur_file.readlines()]
             logger.info('decoding success', stdout=False)
+            search_results.files.append(path)
             return lines
         
         except FileNotFoundError:
