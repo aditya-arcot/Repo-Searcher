@@ -73,6 +73,7 @@ class RepositorySearcher:
 
     def search(self) -> None:
         ''' search through repositories for specified words '''
+        no_search = len(self.config.get(ConfigEnum.SEARCH_WORDS.name)) == 0
         with open(ConfigEnum.REPOS.value, 'r', encoding='utf-8') as json_file:
             data = json.loads(''.join(json_file.readlines()))
             n_repos = data['count']
@@ -84,14 +85,17 @@ class RepositorySearcher:
                     continue
 
                 if repo.update(): # update unnecessary or successful
-                    details = self.__search_repo(repo)
-                    self.writer.write_repo_results(details)
+                    if no_search:
+                        self.__skip_repo('no search attempted')
+                    else:
+                        details = self.__search_repo(repo)
+                        self.writer.write_repo_results(details)
+                        self.writer.write_repo_end()
                 else:
                     self.__skip_repo('update unsuccessful')
 
-                self.writer.write_repo_end()
-
-        self.writer.write_found_words(self.__found_words)
+        if not no_search:
+            self.writer.write_found_words(self.__found_words)
         self.__write_last_update()
 
     def __check_included_repo(self, repo_name:str) -> bool:
