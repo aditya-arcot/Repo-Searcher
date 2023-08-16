@@ -83,8 +83,9 @@ class ConfigurationManager:
     def add_search_words(self) -> None:
         ''' adds search words '''
         search_words_enum = ConfigEnum.SEARCH_WORDS
-        original = self.__read_file(search_words_enum.value, critical=True)
-        #print([re.escape(word) for word in original])
+        original = self.__read_file(search_words_enum.value)
+        if len(original) == 0:
+            self.logger.info('no search words, program will be used to update local repos')
         self.__info[search_words_enum.name] = [re.escape(word) for word in original]
 
     def add_excluded_files(self) -> None:

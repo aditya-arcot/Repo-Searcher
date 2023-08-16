@@ -107,7 +107,10 @@ class ADORepository:
         ''' makes an attempt to either pull or clone repo '''
         try:
             if mode == GitCommandEnum.PULL.name:
-                git.Repo(self.path).git.pull()
+                repo = git.Repo(self.path)
+                repo.head.reset(working_tree=True)
+                repo.git.clean('-f', '-d')
+                repo.git.pull()
             else:
                 git.Repo.clone_from(self.url, self.path)
             self.logger.info(f'{mode} success')

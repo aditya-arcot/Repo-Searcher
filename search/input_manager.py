@@ -21,7 +21,7 @@ class InputManager():
         ''' sets repo mode based on user input '''
         repo_mode = RepoSearchModeEnum.INCLUDE_MODE.value
         if self.__read_option('repo mode?', ['include - default', 'exclude'],
-                              ['e', 'ex', 'exclude']):
+                              ['e', 'ex', 'exc', 'exclude']):
             repo_mode = RepoSearchModeEnum.EXCLUDE_MODE.value
         self.logger.info(f'repo mode - {RepoSearchModeEnum(repo_mode).name}')
         print()
