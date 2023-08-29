@@ -27,11 +27,7 @@ class ResultsWriter:
         if not os.path.exists(output_folder):
             os.mkdir(output_folder)
 
-        self.__results_file = os.path.join(output_folder, 'results.txt')
-        # write blank line to overwrite existing file
-        with open(self.__results_file, 'w', encoding='utf-8') as file:
-            file.write('')
-
+        self.__results_file = os.path.join(output_folder, self.logger.filename.replace('log', 'results'))
         self.__buffer = []
         self.__repo_counter = 0
 
