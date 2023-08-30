@@ -2,19 +2,20 @@
 
 import os
 from typing import Union
+from dataclasses import dataclass
 from configuration_manager import ConfigurationManager
 from constants import Constants, ConfigEnum, RepoSearchModeEnum
 from logging_manager import LoggingManager
 
+@dataclass
 class RepoSearchResults:
-    ''' used for storing search results '''    
-    def __init__(self) -> None:
-        self.matches = {}
-        self.errors = []
-        self.skipped_folders = []
-        self.skipped_files = []
-        self.folders = []
-        self.files = []
+    ''' used for storing search results '''  
+    matches = {}
+    errors = []
+    skipped_folders = []
+    skipped_files = []
+    folders = []
+    files = []
 
 class ResultsWriter:
     '''
@@ -27,7 +28,8 @@ class ResultsWriter:
         if not os.path.exists(output_folder):
             os.mkdir(output_folder)
 
-        self.__results_file = os.path.join(output_folder, self.logger.filename.replace('log', 'results'))
+        self.__results_file = os.path.join(output_folder, \
+                                           self.logger.filename.replace('log', 'results'))
         self.__buffer = []
         self.__repo_counter = 0
 
@@ -51,20 +53,20 @@ class ResultsWriter:
         ''' writes info from configuration sections'''
         log_str = self.__config_str('Log file', [self.logger.filename])
         search_words_str = self.__config_str('Search words', \
-                                             config.get(ConfigEnum.SEARCH_WORDS.name))
+                                             config.get_list(ConfigEnum.SEARCH_WORDS.name))
         repo_mode_str = self.__config_str('Repo mode', [repo_mode])
 
         if repo_mode == RepoSearchModeEnum.INCLUDE_MODE.name:
             included_repos_str = self.__config_str('Included repos', \
-                                                   config.get(ConfigEnum.INCLUDED_REPOS.name))
+                                                   config.get_list(ConfigEnum.INCLUDED_REPOS.name))
         else:
             included_repos_str = self.__config_str('Excluded repos', \
-                                                   config.get(ConfigEnum.EXCLUDED_REPOS.name))
+                                                   config.get_list(ConfigEnum.EXCLUDED_REPOS.name))
 
         excluded_files_str = self.__config_str('Excluded files', \
-                                               config.get(ConfigEnum.EXCLUDED_FILES.name))
+                                               config.get_list(ConfigEnum.EXCLUDED_FILES.name))
         excluded_folders_str = self.__config_str('Excluded folders', \
-                                                 config.get(ConfigEnum.EXCLUDED_FOLDERS.name))
+                                                 config.get_list(ConfigEnum.EXCLUDED_FOLDERS.name))
 
         lines = [
             'Config',

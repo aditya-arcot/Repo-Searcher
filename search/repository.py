@@ -6,6 +6,7 @@ import json
 from enum import Enum
 import requests
 import git
+from git.repo import Repo
 from configuration_manager import ConfigurationManager
 from constants import ConfigEnum
 from logging_manager import LoggingManager
@@ -14,6 +15,7 @@ class GitCommandEnum(Enum):
     ''' enumerations for git commands '''
     PULL, CLONE = range(2)
 
+# pylint: disable=too-many-instance-attributes, too-many-arguments
 class ADORepository:
     ''' Azure DevOps repository class '''
     branch_prefix = 'refs/heads/'
@@ -30,7 +32,7 @@ class ADORepository:
         # populate repo properties
         self.name = name
         self.url = url
-        self.id = _id
+        self.repo_id = _id
         self.path = path
         self.branches = self.__get_branches()
 
@@ -48,8 +50,8 @@ class ADORepository:
         branches = []
 
         # username is arbitrary - PAT authentication
-        resp = requests.get(self.git_branches_url.format(id=self.id), \
-                            auth=('user', self.config.get(ConfigEnum.PAT.name)),
+        resp = requests.get(self.git_branches_url.format(id=self.repo_id), \
+                            auth=('user', self.config.get_str(ConfigEnum.PAT.name)),
                             timeout=10)
 
         if resp.status_code != 200:
@@ -70,7 +72,7 @@ class ADORepository:
             self.logger.info('no branches')
             return False
 
-        last_update:dict = self.config.get(ConfigEnum.LAST_UPDATE.name)
+        last_update:dict = self.config.get_dict(ConfigEnum.LAST_UPDATE.name)
 
         if os.path.exists(self.path):
             self.logger.info('repo path already exists')
@@ -107,12 +109,12 @@ class ADORepository:
         ''' makes an attempt to either pull or clone repo '''
         try:
             if mode == GitCommandEnum.PULL.name:
-                repo = git.Repo(self.path)
+                repo = Repo(self.path)
                 repo.head.reset(working_tree=True)
                 repo.git.clean('-f', '-d')
                 repo.git.pull()
             else:
-                git.Repo.clone_from(self.url, self.path)
+                Repo.clone_from(self.url, self.path)
             self.logger.info(f'{mode} success')
             return True
 
