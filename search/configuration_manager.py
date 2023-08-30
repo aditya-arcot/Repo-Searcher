@@ -2,7 +2,6 @@
 
 import os
 import re
-from typing import Union
 from logging_manager import LoggingManager
 from constants import ConfigEnum, Constants
 
@@ -13,7 +12,9 @@ class ConfigurationManager:
     def __init__(self, logger:LoggingManager, input_folder:str = 'input') -> None:
         self.logger = logger
         self.__input_folder = input_folder
-        self.__info = {}
+        self.__str_info:  dict[str, str] = {}
+        self.__list_info: dict[str, list] = {}
+        self.__dict_info: dict[str, dict] = {}
 
     def __read_file(self, filename, in_input_folder=True, critical=False) -> list:
         ''' checks if file exists and returns lines '''        
@@ -42,7 +43,7 @@ class ConfigurationManager:
         lines = self.__read_file(config_enum.value, critical)
         # replace spaces in repo names
         names = [name.replace(' ', Constants.ENCODED_SPACE) for name in lines]
-        self.__info[config_enum.name] = names
+        self.__list_info[config_enum.name] = names
 
     def add_included_repo_names(self) -> None:
         ''' adds included repo names '''
@@ -56,7 +57,7 @@ class ConfigurationManager:
     def add_last_updated_info(self) -> None:
         ''' adds last updated info '''
         last_update_enum = ConfigEnum.LAST_UPDATE
-        self.__info[last_update_enum.name] = {}
+        self.__dict_info[last_update_enum.name] = {}
 
         lines = self.__read_file(last_update_enum.value, in_input_folder=False)
         for line in lines:
@@ -66,9 +67,9 @@ class ConfigurationManager:
                 name = elements[0]
                 date = float(elements[1])
             except (IndexError, ValueError) as err:
-                self.logger.error(err, stdout=False)
+                self.logger.error(repr(err), stdout=False)
                 continue
-            self.__info[last_update_enum.name][name] = date
+            self.__dict_info[last_update_enum.name][name] = date
 
     def add_pat(self) -> None:
         ''' adds PAT for ADO authentication '''
@@ -78,7 +79,8 @@ class ConfigurationManager:
             pat = lines[0]
         except IndexError: #empty line
             self.logger.critical('PAT not given')
-        self.__info[pat_enum.name] = pat
+            return
+        self.__str_info[pat_enum.name] = pat
 
     def add_search_words(self) -> None:
         ''' adds search words '''
@@ -86,29 +88,52 @@ class ConfigurationManager:
         original = self.__read_file(search_words_enum.value)
         if len(original) == 0:
             self.logger.info('no search words, program will be used to update local repos')
-        self.__info[search_words_enum.name] = [re.escape(word) for word in original]
+        self.__list_info[search_words_enum.name] = [re.escape(word) for word in original]
 
     def add_excluded_files(self) -> None:
         ''' adds excluded files '''
         excluded_files_enum = ConfigEnum.EXCLUDED_FILES
-        self.__info[excluded_files_enum.name] = self.__read_file(excluded_files_enum.value)
+        self.__list_info[excluded_files_enum.name] = self.__read_file(excluded_files_enum.value)
 
     def add_excluded_folders(self) -> None:
         ''' adds excluded folders'''
         excluded_folders_enum = ConfigEnum.EXCLUDED_FOLDERS
-        self.__info[excluded_folders_enum.name] = self.__read_file(excluded_folders_enum.value)
+        self.__list_info[excluded_folders_enum.name] = self.__read_file(excluded_folders_enum.value)
 
-    def get(self, label:str) -> Union[list, dict]:
-        ''' get config info for specified label '''
-        if label in self.__info:
-            return self.__info[label]
-        self.logger.error(f'{label} info not present')
-        return None
+    def get_str(self, label:str) -> str:
+        ''' get config info of type string for label '''
+        if label in self.__str_info:
+            return self.__str_info[label]
+        self.__get_error(label, 'str')
+        return ''
+
+    def get_dict(self, label:str) -> dict:
+        ''' get config info of type dict for label '''
+        if label in self.__dict_info:
+            return self.__dict_info[label]
+        self.__get_error(label, 'dict')
+        return {}
+
+    def get_list(self, label:str) -> list:
+        ''' get config info of type list for label '''
+        if label in self.__list_info:
+            return self.__list_info[label]
+        self.__get_error(label, 'list')
+        return []
+
+    def __get_error(self, label:str, _type:str) -> None:
+        ''' report error finding config info '''
+        self.logger.error(f'{label} not present in {_type} info')
 
     def __repr__(self) -> str:
+        return self.__repr_helper(self.__str_info) + \
+               self.__repr_helper(self.__dict_info) + \
+               self.__repr_helper(self.__list_info)
+
+    def __repr_helper(self, pairs:dict) -> str:
         out = ''
-        for key, value in self.__info.items():
+        for key, value in pairs.items():
             out += key + Constants.NEWLINE
-            out += value.__repr__() + Constants.NEWLINE
+            out += repr(value) + Constants.NEWLINE
             out += Constants.NEWLINE
         return out

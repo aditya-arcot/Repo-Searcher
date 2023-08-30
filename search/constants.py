@@ -1,5 +1,7 @@
 ''' contains various constants'''
 
+# pylint: disable=too-few-public-methods
+
 from enum import Enum
 
 class ConfigEnum(Enum):
