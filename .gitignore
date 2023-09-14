@@ -1,15 +1,17 @@
 __pycache__/
 .venv/
 
+.DS_Store
+
 logs/
 repos/
 output/
 
-.DS_Store
-
 *.xlsx
 *.json
+
 search/input/PAT.txt
 search/input/included_repos.txt
+search/input/excluded_repos.txt
 search/input/words.txt
 search/repos_last_update.txt
