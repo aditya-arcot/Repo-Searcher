@@ -1,0 +1,4 @@
+requests
+GitPython
+openpyxl
+xlrd
