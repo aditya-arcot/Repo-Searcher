@@ -3,17 +3,15 @@
 import os
 import sys
 import logging
-import datetime
 
 class LoggingManager:
     ''' used for logging '''
-    def __init__(self, logs_folder = 'logs', level = logging.DEBUG) -> None:
-        cur_date = datetime.datetime.now().strftime("%m-%d-%Y_%H-%M-%S")
-        self.filename = f'log_{cur_date}.txt'
-        self.__path = os.path.join(logs_folder, self.filename)
+    def __init__(self, date:str, folder = 'results', filename = 'log.txt', level = logging.DEBUG) -> None:
+        self.filename = filename
+        self.__path = os.path.join(folder, date, self.filename)
 
-        if not os.path.exists(logs_folder):
-            os.mkdir(logs_folder)
+        if not os.path.exists(os.path.join(folder, date)):
+            os.makedirs(os.path.join(folder, date))
 
         # set up logging configuration
         logging.basicConfig(

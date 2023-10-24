@@ -1,17 +1,13 @@
-__pycache__/
-.venv/
-
 .DS_Store
 
-logs/
+__pycache__/
+.venv/
 repos/
-output/
+results/
 
-*.xlsx
 *.json
 
-search/input/PAT.txt
-search/input/included_repos.txt
-search/input/excluded_repos.txt
-search/input/words.txt
-search/repos_last_update.txt
+PAT.txt
+included_repos.txt
+excluded_repos.txt
+words.txt

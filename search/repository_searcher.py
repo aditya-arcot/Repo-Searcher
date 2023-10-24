@@ -3,149 +3,266 @@
 import os
 import re
 import json
-from typing import Optional
 import requests
 import xlrd
 import openpyxl
+from datetime import datetime
+from enum import Enum
 from repository import ADORepository
 from logging_manager import LoggingManager
 from configuration_manager import ConfigurationManager
-from constants import ConfigEnum, RepoSearchModeEnum, Constants
-from input_manager import InputManager
-from results_writer import ResultsWriter, RepoSearchResults
+from constants import ConfigEnum, Constants, SearchTemplateModeEnum, SearchExcelModelEnum
+from results_writer import ResultsWriter, BranchSearchResults
 
 # pylint: disable=too-few-public-methods
 class RepositorySearcher:
     ''' used for searching repositories for specific words '''
-    max_line_preview_length = 1000
     search_pattern = '(?<![a-z0-9_]){word}(?![a-z0-9_])'
+    max_line_preview_length = 5000
     line_too_long_msg = 'VALUE TOO LONG, LOOK AT FILE'
 
-    def __init__(self, _logger:LoggingManager) -> None:
-        self.logger = _logger
-        self.__init_input()
-        self.__init_config()
-        self.__init_writer()
-        self.__create_repos_json()
-        self.__found_words = set()
+    def __init__(self) -> None:
+        self.offline = not self.__check_internet_connection()
+        date_str = datetime.now().strftime("%m-%d-%Y_%H-%M-%S")
+        self.logger = LoggingManager(date_str)
+        self.writer = ResultsWriter(self.logger, date_str)
 
-    def __init_input(self) -> None:
-        ''' initialize input manager, set options '''
-        self.input_manager = InputManager(self.logger)
-        self.repo_mode = self.input_manager.get_repo_mode()
-        self.search_excel = self.input_manager.get_search_excel()
+        self.__init_config()
+        if not self.offline:
+            self.__create_repos_json()
+        self.__create_repos()
+
+        self.writer.write_config(self.config, self.search_repos_branches)
+
+    def __check_internet_connection(self):
+        try:
+            response = requests.get("https://www.google.com", timeout=5)
+            return response.status_code == 200
+        except requests.ConnectionError:
+            return False
 
     def __init_config(self) -> None:
         ''' initialize configuration manager, set config info '''
         self.config = ConfigurationManager(self.logger)
-        self.config.add_pat()
+        if not self.offline:
+            self.config.add_pat()
+        self.config.add_last_updated_info()
         self.config.add_search_words()
         self.config.add_excluded_files()
         self.config.add_excluded_folders()
-        self.config.add_last_updated_info()
-        if self.repo_mode == RepoSearchModeEnum.INCLUDE_MODE.value:
-            self.config.add_included_repo_names()
-        else:
-            self.config.add_excluded_repo_names()
-
-    def __init_writer(self) -> None:
-        ''' initialize results writer, write config section '''
-        self.writer = ResultsWriter(self.logger)
-        self.writer.write_config(RepoSearchModeEnum(self.repo_mode).name, self.config)
+        self.config.add_included_repos()
+        self.config.add_excluded_repos()
+        self.config.add_repo_search_template_mode()
+        self.config.add_search_excel_mode()
 
     def __create_repos_json(self) -> None:
         '''
         create json with repository information from ADO API
         see learn.microsoft.com/en-us/rest/api/azure/devops/git/?view=azure-devops-rest-7.0
         '''
-        git_repos_url = 'https://dev.azure.com/bp-vsts/NAGPCCR/_apis/git/' + \
+        ado_repos_url = 'https://dev.azure.com/bp-vsts/NAGPCCR/_apis/git/' + \
                             'repositories?api-version=7.0'
-        resp = requests.get(git_repos_url, \
-                            auth=('user', self.config.get_str(ConfigEnum.PAT.name)), \
-                            timeout=10)
+        ado_branches_url = 'https://dev.azure.com/bp-vsts/NAGPCCR/_apis/git/' + \
+                            'repositories/{}/refs?filter=heads/&api-version=7.0'
 
-        if resp.status_code != 200:
-            self.logger.critical(f'error requesting repos - {resp.status_code}')
+        auth = ('user', self.config.get_str(ConfigEnum.PAT.name))
+
+        resp = self.__make_request(ado_repos_url, auth, error_msg='max retries requesting repos, restart program')
+        
+        assert resp is not None
+        repos_data = resp.json()
+        if 'value' not in repos_data:
+            self.logger.critical(f'badly formed json response, restart program')
+
+        self.logger.info('success getting repos info')
+
+        branch_start = 'refs/heads/'
+
+        for n, i in enumerate(repos_data['value']):
+            if 'defaultBranch' not in i:
+                repos_data['value'][n]['branches'] = []
+                continue
+
+            i['defaultBranch'] = i['defaultBranch'].replace(branch_start, "", 1)
+
+            url = ado_branches_url.format(i['id'])
+            resp = self.__make_request(url, auth, error_msg='max retries requesting branches, skipping')
+            
+            if not resp:
+                continue
+            
+            self.logger.info(f'getting branch info for {i["name"]} ({n+1}/{repos_data["count"]})')
+
+            try:   
+                branches_data = resp.json()
+                branches = [branch['name'].replace(branch_start, "", 1) for branch in branches_data['value']]
+                assert i['defaultBranch'] in branches
+                repos_data['value'][n]['branches'] = branches
+            except Exception as e:
+                self.logger.error(f'failed parsing branches data, skipping - {e.__repr__()}');
 
         try:
             with open(ConfigEnum.REPOS.value, 'w', encoding='utf-8') as json_file:
-                json.dump(resp.json(), json_file, indent=4)
+                json.dump(repos_data, json_file, indent=4)
         except requests.exceptions.JSONDecodeError:
             self.logger.critical('error parsing repos json info')
 
-    def search(self) -> None:
-        ''' search through repositories for specified words '''
-        no_search = len(self.config.get_list(ConfigEnum.SEARCH_WORDS.name)) == 0
+    def __make_request(self, url, auth, timeout=10, max_request_attempts=5, error_msg=''):
+        attempts = 0
+        resp = None
+        req_err = 'request failed, trying again'
+        while attempts < max_request_attempts:
+            try:
+                resp = requests.get(url, auth=auth, timeout=timeout)
+                if resp.status_code == 200:
+                    return resp
+                attempts += 1
+                self.logger.error(req_err)
+            except Exception as e:
+                attempts += 1
+                self.logger.error(req_err)
+        self.logger.critical(error_msg)
+
+    def __create_repos(self) -> None:
         with open(ConfigEnum.REPOS.value, 'r', encoding='utf-8') as json_file:
             data = json.loads(''.join(json_file.readlines()))
-            n_repos = data['count']
-            self.logger.info(f"{n_repos} repos")
+        for repo_info in data['value']:
+            repo_info['name'] = repo_info['name'].replace(' ', Constants.ENCODED_SPACE)
 
-            for num, repo_data in enumerate(data['value']):
-                repo = self.__create_repo_obj(num, repo_data, n_repos)
-                if repo is None:
-                    continue
+        self.search_repos_branches = self.__create_search_repos_info(data['value'])
 
-                if repo.update(): # update unnecessary or successful
-                    if no_search:
-                        self.__skip_repo('no search attempted')
+        self.repos:list[ADORepository] = []
+        for repo, branches in self.search_repos_branches.items():
+            url = next((d['remoteUrl'] for d in data['value'] if d.get('name') == repo), None)
+            if url is None:
+                self.logger.error(f'{repo} url not found')
+                continue
+            self.repos.append(ADORepository(self.logger, repo, branches, url, os.path.join('repos', repo)))
+
+    def __create_search_repos_info(self, repo_json):
+        class RepoDetailsListEnum(Enum):
+            defaultBranch, branches = range(2)
+        
+        repo_details = {repo['name']:
+                        [repo['defaultBranch'] if 'defaultBranch' in repo else '',
+                         repo['branches']]
+                        for repo in repo_json}
+
+        match self.config.get_int(ConfigEnum.SEARCH_TEMPLATE_MODE.name):
+            case SearchTemplateModeEnum.ALL_REPOS_DEFAULT_BRANCH.value:
+                search_repos_branches = {name:
+                                         set([details[RepoDetailsListEnum.defaultBranch.value]])
+                                         for name, details in repo_details.items()
+                                         if len(details[RepoDetailsListEnum.branches.value]) != 0}
+            case SearchTemplateModeEnum.ALL_REPOS_ALL_BRANCHES.value:
+                search_repos_branches = {name:
+                                         set(details[RepoDetailsListEnum.branches.value])
+                                         for name, details in repo_details.items()}
+            case _: # default
+                search_repos_branches = {}
+
+        included = self.config.get_dict(ConfigEnum.INCLUDED_REPOS.name)
+        for include_name, include_branches in included.items():
+            if include_name not in repo_details:
+                self.logger.error(f'{include_name} is not a valid repo')
+                continue
+
+            default = repo_details[include_name][RepoDetailsListEnum.defaultBranch.value]
+            branches = repo_details[include_name][RepoDetailsListEnum.branches.value]
+
+            if include_name not in search_repos_branches:
+                search_repos_branches[include_name] = set()
+
+            # add default branch
+            if len(include_branches) == 0 and default:
+                search_repos_branches[include_name].add(default)
+            
+            # add all branches
+            elif '*' in include_branches:
+                search_repos_branches[include_name].update(branches)
+
+            # add specific branches
+            else:
+                for include_branch in include_branches:
+                    if include_branch in branches:
+                        search_repos_branches[include_name].add(include_branch)
                     else:
-                        details = self.__search_repo(repo)
-                        self.writer.write_repo_results(details)
-                        self.writer.write_repo_end()
+                        self.logger.error(f'{include_branch} is not a branch of {include_name}')
+
+        excluded = self.config.get_dict(ConfigEnum.EXCLUDED_REPOS.name)
+        for exclude_name, exclude_branches in excluded.items():
+            if exclude_name not in search_repos_branches:
+                self.logger.info(f'{exclude_name} for {exclude_name} is already not included in search')
+                continue
+
+            # remove all branches
+            if len(exclude_branches) == 0 or '*' in exclude_branches:
+                search_repos_branches.pop(exclude_name)
+
+            else:
+                for exclude_branch in exclude_branches:
+                    if exclude_branch in search_repos_branches[exclude_name]:
+                        search_repos_branches[exclude_name].remove(exclude_branch)
+                    else:
+                        self.logger.info(f'branch {exclude_branch} is already not included in search')
+
+        return search_repos_branches
+
+    def search(self) -> None:
+        ''' search through repositories for specified words '''
+        last_update_dict = self.config.get_dict(ConfigEnum.LAST_UPDATE.name)
+        no_search = len(self.config.get_list(ConfigEnum.SEARCH_WORDS.name)) == 0
+
+        self.logger.info(f'offline mode: {self.offline}')
+
+        for n, repo in enumerate(self.repos):
+            self.logger.info(f'repo {n+1}/{len(self.repos)} - {repo.name}')
+            self.writer.write_repo_start(repo.name)
+
+            for m, branch in enumerate(repo.branches):
+                self.logger.info(f'branch {m+1}/{len(repo.branches)} - {branch}')
+                self.writer.write_branch_start(branch)
+
+                if not self.offline:
+                    if repo.update_branch(branch, last_update_dict):
+                        self.__search_branch_main(no_search, repo, branch)
+                    else:
+                        self.__skip_branch('update unsuccessful')
+                
                 else:
-                    self.__skip_repo('update unsuccessful')
+                    if repo.check_branch_path_exists(branch):
+                        try:
+                            self.logger.info(last_update_dict[repo.name][branch])
+                        except KeyError:
+                            self.logger.error('branch last update info not available')
+
+                        self.__search_branch_main(no_search, repo, branch)
+                    else:
+                        self.logger.error('local branch files not available')
 
         if not no_search:
-            self.writer.write_found_words(self.__found_words)
+            self.writer.write_found_words()
         self.__write_last_update()
 
-    def __check_included_repo(self, repo_name:str) -> bool:
-        ''' check if repo is included in search '''
-        if self.repo_mode == RepoSearchModeEnum.INCLUDE_MODE.value:
-            return repo_name in self.config.get_list(ConfigEnum.INCLUDED_REPOS.name)
-        return repo_name not in self.config.get_list(ConfigEnum.EXCLUDED_REPOS.name)
+    def __search_branch_main(self, no_search: bool, repo:ADORepository, branch:str) -> None:
+        if no_search:
+            self.__skip_branch('no search attempted')
+        else:
+            details = self.__search_branch(repo, branch)
+            self.writer.write_branch_results(repo.name, branch, details)
 
-    def __skip_repo(self, msg:str) -> None:
-        ''' log, write info for skipped repo '''
+    def __skip_branch(self, msg:str) -> None:
+        ''' log, write info for skipped branch '''
         self.logger.info(msg)
-        self.writer.write_repo_skip(msg)
-        self.writer.write_repo_end()
+        self.writer.write_branch_skip(msg)
 
-    def __create_repo_obj(self, num:int, repo_data:dict, n_repos:int) -> Optional[ADORepository]:
-        ''' returns ADO repository object '''
-        try:
-            name = repo_data['name'].lower().replace(' ', Constants.ENCODED_SPACE)
-            url = repo_data['remoteUrl']
-            _id = repo_data['id']
-        except KeyError:
-            self.logger.critical('issue parsing repos json')
-            return None
-
-        self.logger.info(f'repo {num+1}/{n_repos} - {name}')
-
-        self.writer.write_repo_start(name)
-        if not self.__check_included_repo(name):
-            self.__skip_repo('not included in search')
-            return None
-        self.logger.info('included in search')
-
-        default_branch = 'NONE'
-        if 'defaultBranch' in repo_data:
-            default_branch = repo_data['defaultBranch']
-
-        repo = ADORepository(self.logger, self.config, name, url, _id, \
-                             os.path.join('repos', name), default_branch)
-        return repo
-
-    def __search_repo(self, repo:ADORepository) -> RepoSearchResults:
+    def __search_branch(self, repo:ADORepository, branch:str) -> BranchSearchResults:
         ''' search local repository files for search words '''
-        search_results = RepoSearchResults()
+        search_results = BranchSearchResults()
+        excluded_folders = self.config.get_list(ConfigEnum.EXCLUDED_FOLDERS.name)
+        excluded_files = self.config.get_list(ConfigEnum.EXCLUDED_FILES.name)
 
-        for root, dirs, files in os.walk(repo.path):
-            excluded_folders = self.config.get_list(ConfigEnum.EXCLUDED_FOLDERS.name)
-            excluded_files = self.config.get_list(ConfigEnum.EXCLUDED_FILES.name)
-
+        for root, dirs, files in os.walk(os.path.join(repo.path, branch)):
             skipped_dirs = [_dir for _dir in dirs if _dir.lower() in excluded_folders]
             skipped_files = [file for file in files if \
                              file.lower().endswith(tuple(excluded_files))]
@@ -162,25 +279,21 @@ class RepositorySearcher:
 
             for file in files:
                 path = os.path.join(root, file)
-                logger.info(f'file - {path}', stdout=False)
-                self.__search_file(path, search_results)
+                self.logger.info(f'file - {path}', stdout=False)
+
+                if path.endswith(tuple(['.xls', '.xlsm', '.xlsx'])):
+                    if self.config.get_int(ConfigEnum.EXCEL_SEARCH_MODE.name) == SearchExcelModelEnum.NO.value:
+                        search_results.skipped_files.append(path)
+                    else:
+                        search_results.files.append(path)
+                        if path.endswith('.xls'):
+                            self.__search_legacy_spreadsheet_file(path, search_results.matches)
+                        else:
+                            self.__search_spreadsheet_file(path, search_results.matches)
+                else:
+                    self.__search_plaintext_file(path, search_results)
 
         return search_results
-
-    def __search_file(self, path, search_results:RepoSearchResults) -> None:
-        ''' searches file for specified words '''
-        # Excel files
-        if path.endswith(tuple(['.xls', '.xlsm', '.xlsx'])):
-            if not self.search_excel:
-                search_results.skipped_files.append(path)
-            else:
-                search_results.files.append(path)
-                if path.endswith('.xls'):
-                    self.__search_legacy_spreadsheet_file(path, search_results.matches)
-                else:
-                    self.__search_spreadsheet_file(path, search_results.matches)
-        else:
-            self.__search_ordinary_file(path, search_results)
 
     def __search_legacy_spreadsheet_file(self, path:str, matches:dict) -> None:
         ''' searches .xls file by iterating over words, sheets, cells '''
@@ -218,10 +331,10 @@ class RepositorySearcher:
             if len(val) > self.max_line_preview_length:
                 val = self.line_too_long_msg
             log_string = f'sheet {sheet_name}, row {n_row}, col {n_col} - {val}'
-            logger.info(f'match - {search_word} - {log_string}', stdout=False)
+            self.logger.info(f'match - {search_word} - {log_string}', stdout=False)
             self.__add_new_match(matches, path, search_word, log_string)
 
-    def __search_ordinary_file(self, path:str, search_results:RepoSearchResults) -> None:
+    def __search_plaintext_file(self, path:str, search_results:BranchSearchResults) -> None:
         ''' searches non-spreadsheet file for specified words '''
         lines = self.__decode_file(path, search_results)
         if len(lines) == 0:
@@ -236,23 +349,23 @@ class RepositorySearcher:
                     if len(line) > self.max_line_preview_length:
                         line = self.line_too_long_msg
                     log_string = f'line {line_num + 1} - {line}'
-                    logger.info(f'match - {search_word} - {log_string}', stdout=False)
+                    self.logger.info(f'match - {search_word} - {log_string}', stdout=False)
                     self.__add_new_match(search_results.matches, path, search_word, log_string)
 
-    def __decode_file(self, path:str, search_results:RepoSearchResults) -> list:
+    def __decode_file(self, path:str, search_results:BranchSearchResults) -> list:
         ''' attempts decoding file, returns lines '''        
         try:
             with open(path, 'r', encoding='utf-8', errors='ignore') as cur_file:
                 lines = [line.lower() for line in cur_file.readlines()]
-            logger.info('decoding success', stdout=False)
+            self.logger.info('decoding success', stdout=False)
             search_results.files.append(path)
             return lines
 
         except FileNotFoundError:
-            logger.error(f'file not found - path too long - {path}', stdout=False)
+            self.logger.error(f'file not found - path too long - {path}', stdout=False)
 
         except (UnicodeDecodeError, UnicodeError):
-            logger.error('decoding failure', stdout=False)
+            self.logger.error('decoding failure', stdout=False)
 
         search_results.errors.append(path)
         return []
@@ -267,16 +380,12 @@ class RepositorySearcher:
 
         matches[path][search_word].append(note)
 
-        self.__found_words.add(search_word)
-
     def __write_last_update(self) -> None:
         ''' writes last updated info to file '''
+        update_dict = self.config.get_dict(ConfigEnum.LAST_UPDATE.name)
         with open(ConfigEnum.LAST_UPDATE.value, 'w', encoding="utf-8") as update_file:
-            for repo, update_time in self.config.get_dict(ConfigEnum.LAST_UPDATE.name).items():
-                update_file.write(repo + Constants.TAB + str(update_time) + Constants.NEWLINE)
+            json.dump(update_dict, update_file, indent=4)
 
 
 if __name__ == '__main__':
-    logger = LoggingManager()
-    repoSearcher = RepositorySearcher(logger)
-    repoSearcher.search()
+    RepositorySearcher().search()

@@ -2,8 +2,9 @@
 
 import os
 import re
+import json
 from logging_manager import LoggingManager
-from constants import ConfigEnum, Constants
+from constants import Constants, ConfigEnum, SearchTemplateModeEnum, SearchExcelModelEnum
 
 class ConfigurationManager:
     ''' used to store and retrieve configuration info '''
@@ -15,13 +16,11 @@ class ConfigurationManager:
         self.__str_info:  dict[str, str] = {}
         self.__list_info: dict[str, list] = {}
         self.__dict_info: dict[str, dict] = {}
+        self.__int_info:  dict[str, int] = {}
 
-    def __read_file(self, filename, in_input_folder=True, critical=False) -> list:
+    def __read_file(self, filename, lower=True, critical=False) -> list:
         ''' checks if file exists and returns lines '''        
-        if in_input_folder:
-            path = os.path.join(self.__input_folder, filename)
-        else:
-            path = filename
+        path = os.path.join(self.__input_folder, filename)
 
         if not os.path.exists(path):
             if critical:
@@ -33,43 +32,12 @@ class ConfigurationManager:
         lines = []
         with open(path, 'r', encoding='utf-8') as file:
             for line in file.readlines():
-                line = line.strip().lower()
+                line = line.strip()
+                if lower:
+                    line = line.lower()
                 if (not line.startswith('#')) and (not line == ''):
                     lines.append(line)
         return lines
-
-    def __add_repo_names(self, config_enum:ConfigEnum, critical=False) -> None:
-        ''' adds either excluded or included repo names '''
-        lines = self.__read_file(config_enum.value, critical)
-        # replace spaces in repo names
-        names = [name.replace(' ', Constants.ENCODED_SPACE) for name in lines]
-        self.__list_info[config_enum.name] = names
-
-    def add_included_repo_names(self) -> None:
-        ''' adds included repo names '''
-        # include mode must have input
-        self.__add_repo_names(ConfigEnum.INCLUDED_REPOS, critical=True)
-
-    def add_excluded_repo_names(self) -> None:
-        ''' adds excluded repo names '''
-        self.__add_repo_names(ConfigEnum.EXCLUDED_REPOS)
-
-    def add_last_updated_info(self) -> None:
-        ''' adds last updated info '''
-        last_update_enum = ConfigEnum.LAST_UPDATE
-        self.__dict_info[last_update_enum.name] = {}
-
-        lines = self.__read_file(last_update_enum.value, in_input_folder=False)
-        for line in lines:
-            # expected format - {name}\t{date}
-            elements = line.split('\t')
-            try:
-                name = elements[0]
-                date = float(elements[1])
-            except (IndexError, ValueError) as err:
-                self.logger.error(repr(err), stdout=False)
-                continue
-            self.__dict_info[last_update_enum.name][name] = date
 
     def add_pat(self) -> None:
         ''' adds PAT for ADO authentication '''
@@ -99,6 +67,81 @@ class ConfigurationManager:
         ''' adds excluded folders'''
         excluded_folders_enum = ConfigEnum.EXCLUDED_FOLDERS
         self.__list_info[excluded_folders_enum.name] = self.__read_file(excluded_folders_enum.value)
+    
+    def add_last_updated_info(self) -> None:
+        ''' adds last updated info '''
+        last_update_enum = ConfigEnum.LAST_UPDATE
+        if os.path.exists(last_update_enum.value):
+            with open(last_update_enum.value, 'r') as json_file:
+                data = json_file.read()
+            data = json.loads(data)
+        else:
+            data = {}
+        self.__dict_info[last_update_enum.name] = data
+
+    def __add_repos(self, config_enum:ConfigEnum) -> None:
+        ''' adds either excluded or included repo info '''
+        lines = self.__read_file(config_enum.value, lower=False)
+        repos = {}
+        for line in lines:
+            split = line.split()
+            name = split[0]
+            if name not in repos:
+                repos[name] = set()
+            repos[name] = repos[name] | set(split[1:])
+        self.__dict_info[config_enum.name] = repos
+
+    def add_included_repos(self) -> None:
+        ''' adds included repo info '''
+        self.__add_repos(ConfigEnum.INCLUDED_REPOS)
+
+    def add_excluded_repos(self) -> None:
+        ''' adds excluded repo info '''
+        self.__add_repos(ConfigEnum.EXCLUDED_REPOS)
+    
+    def __get_input(self, options:list) -> int:
+        for n, option in enumerate(options):
+            print(f' - {n} - {option}')
+
+        while True:
+            try:
+                choice = int(input('enter a valid integer: '))
+                if choice >= 0 and choice < len(options):
+                    return choice
+            except KeyboardInterrupt:
+                self.logger.critical('keyboard interrupt')
+            except ValueError:
+                print('invalid, please try again')
+
+    def add_repo_search_template_mode(self) -> None:
+        print('Select a repository search template for initialization')
+        print('Further configuration can be done using Include/Exclude files')
+        repo_mode = self.__get_input(['None', 'All'])
+        
+        search_mode_enum_value = -1
+        if repo_mode == 0:
+            search_mode_enum_value = SearchTemplateModeEnum.NO_REPOS_NO_BRANCHES.value
+            self.__int_info[ConfigEnum.SEARCH_TEMPLATE_MODE.name] = search_mode_enum_value
+        elif repo_mode == 1:
+            print('Select a branch search template for initialization')
+            print('Further configuration can be done using Include/Exclude files')
+            branch_mode = self.__get_input(['Default', 'All'])
+            search_mode_enum_value = SearchTemplateModeEnum(branch_mode).value + 1
+            self.__int_info[ConfigEnum.SEARCH_TEMPLATE_MODE.name] = search_mode_enum_value
+        else:
+            self.logger.critical('unhandled repo mode')
+            return
+        
+        self.logger.info(f'repo search template mode - {SearchTemplateModeEnum(search_mode_enum_value).name}')
+
+    def add_search_excel_mode(self) -> None:
+        ''' sets search Excel based on user input '''
+        print('Search Excel files? (xls, xlsm, xlsx)')
+        print('Only search when necessary to avoid unnecessary delay')
+        excel = self.__get_input(['No', 'Yes'])
+        search_excel_enum_value = SearchExcelModelEnum(excel).value
+        self.__int_info[ConfigEnum.EXCEL_SEARCH_MODE.name] = search_excel_enum_value
+        self.logger.info(f'search Excel - {SearchExcelModelEnum(search_excel_enum_value).name}')
 
     def get_str(self, label:str) -> str:
         ''' get config info of type string for label '''
@@ -121,6 +164,13 @@ class ConfigurationManager:
         self.__get_error(label, 'list')
         return []
 
+    def get_int(self, label:str) -> int:
+        ''' get config info of type int for label '''
+        if label in self.__int_info:
+            return self.__int_info[label]
+        self.__get_error(label, 'int')
+        return -1
+
     def __get_error(self, label:str, _type:str) -> None:
         ''' report error finding config info '''
         self.logger.error(f'{label} not present in {_type} info')
@@ -128,7 +178,8 @@ class ConfigurationManager:
     def __repr__(self) -> str:
         return self.__repr_helper(self.__str_info) + \
                self.__repr_helper(self.__dict_info) + \
-               self.__repr_helper(self.__list_info)
+               self.__repr_helper(self.__list_info) + \
+               self.__repr_helper(self.__int_info)
 
     def __repr_helper(self, pairs:dict) -> str:
         out = ''
