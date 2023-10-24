@@ -1,3 +1,5 @@
+"""runs repository search"""
+
 from repository_searcher import RepositorySearcher
 
 if __name__ == "__main__":

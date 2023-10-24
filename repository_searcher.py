@@ -1,13 +1,16 @@
 """ contains repository searcher class """
 
 import os
+import sys
 import re
 import json
+import time
+from datetime import datetime
+from enum import Enum
+from typing import Optional
 import requests
 import xlrd
 import openpyxl
-from datetime import datetime
-from enum import Enum
 from repository import ADORepository
 from logging_manager import LoggingManager
 from configuration_manager import ConfigurationManager
@@ -22,11 +25,14 @@ from results_writer import ResultsWriter, BranchSearchResults
 
 # pylint: disable=too-few-public-methods
 class RepositorySearcher:
-    """used for searching repositories for specific words"""
+    """used for searching repository branches for specific words"""
 
     search_pattern = "(?<![a-z0-9_]){word}(?![a-z0-9_])"
     max_line_preview_length = 5000
     line_too_long_msg = "VALUE TOO LONG, LOOK AT FILE"
+    ado_base_url = "https://dev.azure.com/bp-vsts/NAGPCCR/_apis/git/"
+    repos_url = ado_base_url + "repositories?api-version=7.0"
+    branches_url = ado_base_url + "repositories/{}/refs?filter=heads/&api-version=7.0"
 
     def __init__(self) -> None:
         self.offline = not self.__check_internet_connection()
@@ -41,7 +47,7 @@ class RepositorySearcher:
 
         self.writer.write_config(self.config, self.search_repos_branches)
 
-    def __check_internet_connection(self):
+    def __check_internet_connection(self) -> bool:
         try:
             response = requests.get("https://www.google.com", timeout=5)
             return response.status_code == 200
@@ -49,10 +55,9 @@ class RepositorySearcher:
             return False
 
     def __init_config(self) -> None:
-        """initialize configuration manager, set config info"""
         self.config = ConfigurationManager(self.logger)
         if not self.offline:
-            self.config.add_pat()
+            self.config.add_token()
         self.config.add_last_updated_info()
         self.config.add_search_words()
         self.config.add_excluded_files()
@@ -65,21 +70,32 @@ class RepositorySearcher:
     def __create_repos_json(self) -> None:
         """
         create json with repository information from ADO API
-        see learn.microsoft.com/en-us/rest/api/azure/devops/git/?view=azure-devops-rest-7.0
+        learn.microsoft.com/en-us/rest/api/azure/devops/git/?view=azure-devops-rest-7.0
         """
-        ado_repos_url = (
-            "https://dev.azure.com/bp-vsts/NAGPCCR/_apis/git/"
-            + "repositories?api-version=7.0"
-        )
-        ado_branches_url = (
-            "https://dev.azure.com/bp-vsts/NAGPCCR/_apis/git/"
-            + "repositories/{}/refs?filter=heads/&api-version=7.0"
-        )
+
+        json_path = ConfigEnum.REPOS.value
+
+        if os.path.exists(json_path):
+            with open(json_path, "r", encoding="utf-8") as json_file:
+                data = json.loads("".join(json_file.readlines()))
+
+            if (
+                "lastUpdate" in data
+                and data["lastUpdate"] - time.time() < Constants.DAY_IN_SECONDS
+            ):
+                self.logger.info(
+                    "repos json exists and was updated within the last day"
+                )
+                return
+
+            self.logger.info("repos json exists but requires update")
+
+        self.logger.info("creating repos json")
 
         auth = ("user", self.config.get_str(ConfigEnum.PAT.name))
 
         resp = self.__make_request(
-            ado_repos_url,
+            self.repos_url,
             auth,
             error_msg="max retries requesting repos, restart program",
         )
@@ -87,70 +103,76 @@ class RepositorySearcher:
         assert resp is not None
         repos_data = resp.json()
         if "value" not in repos_data:
-            self.logger.critical(f"badly formed json response, restart program")
+            self.logger.critical("badly formed json response, restart program")
 
         self.logger.info("success getting repos info")
 
         branch_start = "refs/heads/"
 
-        for n, i in enumerate(repos_data["value"]):
-            if "defaultBranch" not in i:
-                repos_data["value"][n]["branches"] = []
+        for pos, repo in enumerate(repos_data["value"]):
+            if "defaultBranch" not in repo:
+                self.logger.error(
+                    "repo does not have a default branch - most likely empty"
+                )
+                repos_data["value"][pos]["branches"] = []
                 continue
 
-            i["defaultBranch"] = i["defaultBranch"].replace(branch_start, "", 1)
+            repo["defaultBranch"] = repo["defaultBranch"].replace(branch_start, "", 1)
 
-            url = ado_branches_url.format(i["id"])
+            self.logger.info(
+                f'getting branch info for {repo["name"]} ({pos+1}/{repos_data["count"]})'
+            )
+
+            url = self.branches_url.format(repo["id"])
             resp = self.__make_request(
                 url, auth, error_msg="max retries requesting branches, skipping"
             )
-
             if not resp:
                 continue
 
-            self.logger.info(
-                f'getting branch info for {i["name"]} ({n+1}/{repos_data["count"]})'
-            )
+            branches_data = resp.json()
+            branches = [
+                branch["name"].replace(branch_start, "", 1)
+                for branch in branches_data["value"]
+            ]
+            assert repo["defaultBranch"] in branches
+            repos_data["value"][pos]["branches"] = branches
 
-            try:
-                branches_data = resp.json()
-                branches = [
-                    branch["name"].replace(branch_start, "", 1)
-                    for branch in branches_data["value"]
-                ]
-                assert i["defaultBranch"] in branches
-                repos_data["value"][n]["branches"] = branches
-            except Exception as e:
-                self.logger.error(
-                    f"failed parsing branches data, skipping - {e.__repr__()}"
-                )
+        repos_data["lastUpdate"] = time.time()
 
         try:
-            with open(ConfigEnum.REPOS.value, "w", encoding="utf-8") as json_file:
+            with open(json_path, "w", encoding="utf-8") as json_file:
                 json.dump(repos_data, json_file, indent=4)
         except requests.exceptions.JSONDecodeError:
             self.logger.critical("error parsing repos json info")
 
-    def __make_request(
-        self, url, auth, timeout=10, max_request_attempts=5, error_msg=""
-    ):
+    def __make_request(self, url, auth, max_request_attempts=5, error_msg=""):
         attempts = 0
         resp = None
         req_err = "request failed, trying again"
+
         while attempts < max_request_attempts:
             try:
-                resp = requests.get(url, auth=auth, timeout=timeout)
+                resp = requests.get(url, auth=auth, timeout=10)
                 if resp.status_code == 200:
                     return resp
                 attempts += 1
                 self.logger.error(req_err)
-            except Exception as e:
+
+            except requests.exceptions.ConnectionError:
                 attempts += 1
                 self.logger.error(req_err)
+
         self.logger.critical(error_msg)
+        sys.exit()
 
     def __create_repos(self) -> None:
-        with open(ConfigEnum.REPOS.value, "r", encoding="utf-8") as json_file:
+        json_path = ConfigEnum.REPOS.value
+
+        if not os.path.exists(json_path):
+            self.logger.critical("repos json does not exist")
+
+        with open(json_path, "r", encoding="utf-8") as json_file:
             data = json.loads("".join(json_file.readlines()))
         for repo_info in data["value"]:
             repo_info["name"] = repo_info["name"].replace(" ", Constants.ENCODED_SPACE)
@@ -171,10 +193,12 @@ class RepositorySearcher:
                 )
             )
 
-    def __create_search_repos_info(self, repo_json):
-        class RepoDetailsListEnum(Enum):
-            defaultBranch, branches = range(2)
+    class RepoDetailsListEnum(Enum):
+        """enumerations for repo details list"""
 
+        DEFAULT_BRANCH, BRANCHES = range(2)
+
+    def __create_search_repos_info(self, repo_json):
         repo_details = {
             repo["name"]: [
                 repo["defaultBranch"] if "defaultBranch" in repo else "",
@@ -186,18 +210,24 @@ class RepositorySearcher:
         match self.config.get_int(ConfigEnum.SEARCH_TEMPLATE_MODE.name):
             case SearchTemplateModeEnum.ALL_REPOS_DEFAULT_BRANCH.value:
                 search_repos_branches = {
-                    name: set([details[RepoDetailsListEnum.defaultBranch.value]])
+                    name: set([details[self.RepoDetailsListEnum.DEFAULT_BRANCH.value]])
                     for name, details in repo_details.items()
-                    if len(details[RepoDetailsListEnum.branches.value]) != 0
+                    if len(details[self.RepoDetailsListEnum.BRANCHES.value]) != 0
                 }
             case SearchTemplateModeEnum.ALL_REPOS_ALL_BRANCHES.value:
                 search_repos_branches = {
-                    name: set(details[RepoDetailsListEnum.branches.value])
+                    name: set(details[self.RepoDetailsListEnum.BRANCHES.value])
                     for name, details in repo_details.items()
                 }
             case _:  # default
                 search_repos_branches = {}
 
+        self.__add_included_branches(repo_details, search_repos_branches)
+        self.__remove_excluded_branches(repo_details)
+
+        return search_repos_branches
+
+    def __add_included_branches(self, repo_details: dict, search_repos_branches: dict):
         included = self.config.get_dict(ConfigEnum.INCLUDED_REPOS.name)
         for include_name, include_branches in included.items():
             if include_name not in repo_details:
@@ -205,9 +235,11 @@ class RepositorySearcher:
                 continue
 
             default = repo_details[include_name][
-                RepoDetailsListEnum.defaultBranch.value
+                self.RepoDetailsListEnum.DEFAULT_BRANCH.value
             ]
-            branches = repo_details[include_name][RepoDetailsListEnum.branches.value]
+            branches = repo_details[include_name][
+                self.RepoDetailsListEnum.BRANCHES.value
+            ]
 
             if include_name not in search_repos_branches:
                 search_repos_branches[include_name] = set()
@@ -230,6 +262,7 @@ class RepositorySearcher:
                             f"{include_branch} is not a branch of {include_name}"
                         )
 
+    def __remove_excluded_branches(self, search_repos_branches: dict):
         excluded = self.config.get_dict(ConfigEnum.EXCLUDED_REPOS.name)
         for exclude_name, exclude_branches in excluded.items():
             if exclude_name not in search_repos_branches:
@@ -251,8 +284,6 @@ class RepositorySearcher:
                             f"branch {exclude_branch} is already not included in search"
                         )
 
-        return search_repos_branches
-
     def search(self) -> None:
         """search through repositories for specified words"""
         last_update_dict = self.config.get_dict(ConfigEnum.LAST_UPDATE.name)
@@ -260,12 +291,14 @@ class RepositorySearcher:
 
         self.logger.info(f"offline mode: {self.offline}")
 
-        for n, repo in enumerate(self.repos):
-            self.logger.info(f"repo {n+1}/{len(self.repos)} - {repo.name}")
+        for repo_ind, repo in enumerate(self.repos):
+            self.logger.info(f"repo {repo_ind+1}/{len(self.repos)} - {repo.name}")
             self.writer.write_repo_start(repo.name)
 
-            for m, branch in enumerate(repo.branches):
-                self.logger.info(f"branch {m+1}/{len(repo.branches)} - {branch}")
+            for branch_ind, branch in enumerate(repo.branches):
+                self.logger.info(
+                    f"branch {branch_ind+1}/{len(repo.branches)} - {branch}"
+                )
                 self.writer.write_branch_start(branch)
 
                 if not self.offline:
@@ -275,15 +308,12 @@ class RepositorySearcher:
                         self.__skip_branch("update unsuccessful")
 
                 else:
-                    if repo.check_branch_path_exists(branch):
-                        try:
-                            self.logger.info(last_update_dict[repo.name][branch])
-                        except KeyError:
-                            self.logger.error("branch last update info not available")
+                    try:
+                        self.logger.info(last_update_dict[repo.name][branch])
+                    except KeyError:
+                        self.logger.error("branch last update info not available")
 
-                        self.__search_branch_main(no_search, repo, branch)
-                    else:
-                        self.logger.error("local branch files not available")
+                    self.__search_branch_main(no_search, repo, branch)
 
         if not no_search:
             self.writer.write_found_words()
@@ -296,20 +326,28 @@ class RepositorySearcher:
             self.__skip_branch("no search attempted")
         else:
             details = self.__search_branch(repo, branch)
-            self.writer.write_branch_results(repo.name, branch, details)
+            if details:
+                self.writer.write_branch_results(repo.name, branch, details)
 
     def __skip_branch(self, msg: str) -> None:
         """log, write info for skipped branch"""
         self.logger.info(msg)
         self.writer.write_branch_skip(msg)
 
-    def __search_branch(self, repo: ADORepository, branch: str) -> BranchSearchResults:
+    def __search_branch(
+        self, repo: ADORepository, branch: str
+    ) -> Optional[BranchSearchResults]:
         """search local repository files for search words"""
+        branch_path = os.path.join(repo.path, branch)
+        if not os.path.exists(branch_path):
+            self.logger.error("branch path does not exist")
+            return None
+
         search_results = BranchSearchResults()
         excluded_folders = self.config.get_list(ConfigEnum.EXCLUDED_FOLDERS.name)
         excluded_files = self.config.get_list(ConfigEnum.EXCLUDED_FILES.name)
 
-        for root, dirs, files in os.walk(os.path.join(repo.path, branch)):
+        for root, dirs, files in os.walk(branch_path):
             skipped_dirs = [_dir for _dir in dirs if _dir.lower() in excluded_folders]
             skipped_files = [
                 file for file in files if file.lower().endswith(tuple(excluded_files))

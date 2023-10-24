@@ -7,7 +7,7 @@ results/
 
 *.json
 
-PAT.txt
+token.txt
 included_repos.txt
 excluded_repos.txt
 words.txt

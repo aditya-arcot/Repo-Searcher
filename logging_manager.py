@@ -1,4 +1,4 @@
-""" contains logging manager class """
+"""contains Logging Manager class"""
 
 import os
 import sys
@@ -6,22 +6,23 @@ import logging
 
 
 class LoggingManager:
-    """used for logging"""
+    """used for logging and printing"""
 
     def __init__(
         self, date: str, folder="results", filename="log.txt", level=logging.DEBUG
     ) -> None:
         self.filename = filename
-        self.__path = os.path.join(folder, date, self.filename)
 
         if not os.path.exists(os.path.join(folder, date)):
             os.makedirs(os.path.join(folder, date))
+
+        self.__path = os.path.join(folder, date, self.filename)
 
         # set up logging configuration
         logging.basicConfig(
             level=level,
             filename=self.__path,
-            filemode="a",  # append to log file
+            filemode="a",  # append
             format="%(asctime)s - LOGGING.%(levelname)s - %(message)s",
         )
 

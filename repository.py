@@ -1,4 +1,4 @@
-""" contains related repository classes """
+""" contains repository and git enumerations classes """
 
 import os
 import time
@@ -6,6 +6,7 @@ from enum import Enum
 import git
 from git.repo import Repo
 from logging_manager import LoggingManager
+from constants import Constants
 
 
 class GitCommandEnum(Enum):
@@ -14,11 +15,10 @@ class GitCommandEnum(Enum):
     PULL, CLONE = range(2)
 
 
-# pylint: disable=too-many-instance-attributes, too-many-arguments
+# pylint: disable=too-many-arguments, too-few-public-methods
 class ADORepository:
-    """Azure DevOps repository class"""
+    """Azure DevOps repository"""
 
-    day_in_seconds = 86400
     max_git_attempts = 5
 
     def __init__(
@@ -34,10 +34,8 @@ class ADORepository:
         if not os.path.exists(self.path):
             os.mkdir(self.path)
 
-    def check_branch_path_exists(self, branch):
-        return os.path.exists(os.path.join(self.path, branch))
-
     def update_branch(self, branch, last_update_dict: dict):
+        """updates local branch files if necessary"""
         assert branch in self.branches
 
         if os.path.exists(os.path.join(self.path, branch)):
@@ -48,7 +46,7 @@ class ADORepository:
                 self.name not in last_update_dict
                 or branch not in last_update_dict[self.name]
                 or time.time() - last_update_dict[self.name][branch]
-                > self.day_in_seconds
+                > Constants.DAY_IN_SECONDS
             ):
                 self.logger.info("update required")
                 return self.__update_helper(
@@ -62,7 +60,7 @@ class ADORepository:
         return self.__update_helper(branch, last_update_dict, GitCommandEnum.CLONE.name)
 
     def __update_helper(self, branch: str, last_update: dict, mode: str) -> bool:
-        """makes several attempts to either pull or clone repo"""
+        """attempts to pull or clone a repo"""
         attempts = 0
 
         while attempts < self.max_git_attempts:
@@ -81,11 +79,11 @@ class ADORepository:
         return False
 
     def __attempt_update(self, branch, mode) -> bool:
-        """makes an attempt to either pull or clone repo"""
         try:
             if mode == GitCommandEnum.PULL.name:
                 repo = Repo(os.path.join(self.path, branch))
                 repo.git.checkout(branch)
+                # clear local changes / files
                 repo.git.reset("--hard")
                 repo.git.clean("-f", "-d", "-x")
                 repo.remotes.origin.pull(branch)
