@@ -385,7 +385,3 @@ class RepositorySearcher:
         update_dict = self.config.get_dict(ConfigEnum.LAST_UPDATE.name)
         with open(ConfigEnum.LAST_UPDATE.value, 'w', encoding="utf-8") as update_file:
             json.dump(update_dict, update_file, indent=4)
-
-
-if __name__ == '__main__':
-    RepositorySearcher().search()
