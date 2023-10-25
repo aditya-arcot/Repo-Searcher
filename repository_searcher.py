@@ -18,7 +18,6 @@ from constants import (
     ConfigEnum,
     Constants,
     SearchTemplateModeEnum,
-    SearchExcelModelEnum,
 )
 from results_writer import ResultsWriter, BranchSearchResults
 
@@ -65,7 +64,6 @@ class RepositorySearcher:
         self.config.add_included_repos()
         self.config.add_excluded_repos()
         self.config.add_repo_search_template_mode()
-        self.config.add_search_excel_mode()
 
     def __create_repos_json(self) -> None:
         """
@@ -369,94 +367,14 @@ class RepositorySearcher:
             for file in files:
                 path = os.path.join(root, file)
                 self.logger.info(f"file - {path}", stdout=False)
-
-                if path.endswith(tuple([".xls", ".xlsm", ".xlsx"])):
-                    if (
-                        self.config.get_int(ConfigEnum.EXCEL_SEARCH_MODE.name)
-                        == SearchExcelModelEnum.NO.value
-                    ):
-                        search_results.skipped_files.append(path)
-                    else:
-                        search_results.files.append(path)
-                        if path.endswith(".xls"):
-                            self.__search_legacy_spreadsheet_file(
-                                path, search_results.matches
-                            )
-                        else:
-                            self.__search_spreadsheet_file(path, search_results.matches)
-                else:
-                    self.__search_plaintext_file(path, search_results)
+                self.__search_plaintext_file(path, search_results)
 
         return search_results
-
-    def __search_legacy_spreadsheet_file(self, path: str, matches: dict) -> None:
-        """searches .xls file by iterating over words, sheets, cells"""
-        workbook = xlrd.open_workbook(path)
-        for search_word in self.config.get_list(ConfigEnum.SEARCH_WORDS.name):
-            pattern = self.search_pattern.format(word=search_word)
-            for sheet in workbook.sheets():
-                for n_row in range(sheet.nrows):
-                    for n_col in range(sheet.ncols):
-                        cell = sheet.cell(n_row, n_col)
-                        self.__search_cell(
-                            cell,
-                            sheet.name,
-                            n_row,
-                            n_col,
-                            matches,
-                            path,
-                            pattern,
-                            search_word,
-                        )
-
-    def __search_spreadsheet_file(self, path: str, matches: dict) -> None:
-        """searches .xlsm or .xlsx file by iterating over words, sheets, cells"""
-        workbook = openpyxl.load_workbook(path, read_only=True)
-        for search_word in self.config.get_list(ConfigEnum.SEARCH_WORDS.name):
-            pattern = self.search_pattern.format(word=search_word)
-            for sheet in workbook.worksheets:
-                for n_row, row in enumerate(sheet.iter_rows()):
-                    for n_col, cell in enumerate(row):
-                        self.__search_cell(
-                            cell,
-                            sheet.title,
-                            n_row,
-                            n_col,
-                            matches,
-                            path,
-                            pattern,
-                            search_word,
-                        )
-
-    # pylint: disable=too-many-arguments
-    def __search_cell(
-        self,
-        cell,
-        sheet_name: str,
-        n_row: int,
-        n_col: int,
-        matches: dict,
-        path: str,
-        pattern: str,
-        search_word: str,
-    ) -> None:
-        """searches cell for search pattern"""
-        if not cell.value:
-            return
-
-        val = str(cell.value).lower()
-
-        if re.search(pattern, val):
-            if len(val) > self.max_line_preview_length:
-                val = self.line_too_long_msg
-            log_string = f"sheet {sheet_name}, row {n_row}, col {n_col} - {val}"
-            self.logger.info(f"match - {search_word} - {log_string}", stdout=False)
-            self.__add_new_match(matches, path, search_word, log_string)
 
     def __search_plaintext_file(
         self, path: str, search_results: BranchSearchResults
     ) -> None:
-        """searches non-spreadsheet file for specified words"""
+        """searches plaintext file for specified words"""
         lines = self.__decode_file(path, search_results)
         if len(lines) == 0:
             return

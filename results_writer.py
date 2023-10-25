@@ -6,7 +6,6 @@ from constants import (
     Constants,
     ConfigEnum,
     SearchTemplateModeEnum,
-    SearchExcelModelEnum,
 )
 from logging_manager import LoggingManager
 
@@ -77,11 +76,6 @@ class ResultsWriter:
 
         words = config.get_list(ConfigEnum.SEARCH_WORDS.name)
         self.__write_config_section("Search words", words)
-
-        excel_search_mode = SearchExcelModelEnum(
-            config.get_int(ConfigEnum.EXCEL_SEARCH_MODE.name)
-        ).name
-        self.__write_config_section("Excel search mode", excel_search_mode)
 
         excluded_files = config.get_list(ConfigEnum.EXCLUDED_FILES.name)
         self.__write_config_section("Excluded files", excluded_files)

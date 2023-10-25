@@ -8,7 +8,6 @@ from constants import (
     Constants,
     ConfigEnum,
     SearchTemplateModeEnum,
-    SearchExcelModelEnum,
 )
 
 
@@ -159,17 +158,6 @@ class ConfigurationManager:
         self.__int_info[ConfigEnum.SEARCH_TEMPLATE_MODE.name] = search_mode_enum_value
         self.logger.info(
             f"repo search template mode - {SearchTemplateModeEnum(search_mode_enum_value).name}"
-        )
-
-    def add_search_excel_mode(self) -> None:
-        """sets whether to search Excel file types"""
-        print("Search Excel files? (xls, xlsm, xlsx)")
-        print("Only search when necessary to avoid unnecessary delay")
-        excel = self.__get_input(["No", "Yes"])
-        search_excel_enum_value = SearchExcelModelEnum(excel).value
-        self.__int_info[ConfigEnum.EXCEL_SEARCH_MODE.name] = search_excel_enum_value
-        self.logger.info(
-            f"search Excel - {SearchExcelModelEnum(search_excel_enum_value).name}"
         )
 
     def __get_error(self, label: str, _type: str) -> None:

@@ -16,19 +16,13 @@ class ConfigEnum(Enum):
     EXCLUDED_FILES = "excluded_files.txt"
     EXCLUDED_FOLDERS = "excluded_folders.txt"
     SEARCH_WORDS = "words.txt"
-    SEARCH_TEMPLATE_MODE, EXCEL_SEARCH_MODE = range(2)
+    SEARCH_TEMPLATE_MODE = 0
 
 
 class SearchTemplateModeEnum(Enum):
     """enumerations for search template mode"""
 
     NO_REPOS_NO_BRANCHES, ALL_REPOS_DEFAULT_BRANCH, ALL_REPOS_ALL_BRANCHES = range(3)
-
-
-class SearchExcelModelEnum(Enum):
-    """enumerations for search excel mode"""
-
-    NO, YES = range(2)
 
 
 class Constants:
