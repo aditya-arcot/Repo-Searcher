@@ -2,12 +2,7 @@
 
 __pycache__/
 .venv/
+.vscode/
 repos/
 results/
-
-*.json
-
-token.txt
-include_repos.txt
-exclude_repos.txt
-words.txt
+config/
