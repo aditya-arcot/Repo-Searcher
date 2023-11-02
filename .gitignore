@@ -8,6 +8,6 @@ results/
 *.json
 
 token.txt
-included_repos.txt
-excluded_repos.txt
+include_repos.txt
+exclude_repos.txt
 words.txt
