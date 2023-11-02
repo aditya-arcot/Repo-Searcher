@@ -1,21 +1,21 @@
-"""contains repo searcher class"""
+"""contains RepositorySearcher class"""
 
 import os
 import re
 import time
 from typing import Optional
-from config import ConfigManager
+from config import ConfigurationManager
 from constants import BranchSearchResults, Constants, Messages
-from logging_manager import LoggingManager
-from results_writer import ResultsWriter
+from logger import LoggingManager
+from writer import ResultsWriter
 from repository import ADORepository
 
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods
-class RepoSearcher:
+class RepositorySearcher:
     """used to search for specified text in repos"""
     def __init__(
-        self, logger: LoggingManager, writer: ResultsWriter, config: ConfigManager
+        self, logger: LoggingManager, writer: ResultsWriter, config: ConfigurationManager
     ) -> None:
         self.__logger = logger
         self.__writer = writer

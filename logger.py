@@ -1,4 +1,4 @@
-"""contains Logging Manager class"""
+"""contains LoggingManager class"""
 
 import os
 import sys

@@ -1,4 +1,4 @@
-"""contains Config Manager, Config Handler classes"""
+"""contains ConfigurationManager, ConfigurationHandler classes"""
 
 import os
 import time
@@ -6,12 +6,12 @@ import sys
 import json
 from typing import Optional, Union
 import requests
-from logging_manager import LoggingManager
-from constants import Messages, Constants, ConfigFile
+from logger import LoggingManager
+from constants import Messages, Constants, ConfigurationFile
 from repository import ADORepository
 
 
-class ConfigManager:
+class ConfigurationManager:
     """used to store and retrieve configuration info"""
 
     def __init__(self, logger: LoggingManager) -> None:
@@ -82,10 +82,10 @@ class ConfigManager:
 
 
 # pylint: disable=too-few-public-methods
-class ConfigHandler:
+class ConfigurationHandler:
     """used to add config to manager"""
 
-    def __init__(self, config_manager: ConfigManager, logger: LoggingManager) -> None:
+    def __init__(self, config_manager: ConfigurationManager, logger: LoggingManager) -> None:
         self.__config_manager = config_manager
         self.__logger = logger
         self.__config_folder = Constants.CONFIG_FOLDER
@@ -350,7 +350,7 @@ class ConfigHandler:
         files = self.__read_file(exclude_folders_file.filename(), lowercase=True)
         self.__config_manager.set_config(exclude_folders_file.config_key(), files)
 
-    def __load_repos(self, repos_file: ConfigFile) -> None:
+    def __load_repos(self, repos_file: ConfigurationFile) -> None:
         lines = self.__read_file(repos_file.filename())
         repos = {}
 

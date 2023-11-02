@@ -1,8 +1,8 @@
-"""contains various constant classes"""
+"""contains ConfigurationFile, BranchSearchResults, Constants, Messages classes"""
 
 
 # pylint: disable=too-few-public-methods
-class ConfigFile:
+class ConfigurationFile:
     """represents a config file"""
 
     def __init__(self, filename: str) -> None:
@@ -62,14 +62,14 @@ class Constants:
     FOUND_FILE = "found.txt"
 
     # ConfigFile objects
-    TOKEN_FILE = ConfigFile("token.txt")
-    REPO_DATA_FILE = ConfigFile("repo_data.json")
-    WORDS_FILE = ConfigFile("words.txt")
-    BRANCH_UPDATES_FILE = ConfigFile("branch_updates.json")
-    EXCLUDE_FILES_FILE = ConfigFile("exclude_files.txt")
-    EXCLUDE_FOLDERS_FILE = ConfigFile("exclude_folders.txt")
-    INCLUDE_REPOS_FILE = ConfigFile("include_repos.txt")
-    EXCLUDE_REPOS_FILE = ConfigFile("exclude_repos.txt")
+    TOKEN_FILE = ConfigurationFile("token.txt")
+    REPO_DATA_FILE = ConfigurationFile("repo_data.json")
+    WORDS_FILE = ConfigurationFile("words.txt")
+    BRANCH_UPDATES_FILE = ConfigurationFile("branch_updates.json")
+    EXCLUDE_FILES_FILE = ConfigurationFile("exclude_files.txt")
+    EXCLUDE_FOLDERS_FILE = ConfigurationFile("exclude_folders.txt")
+    INCLUDE_REPOS_FILE = ConfigurationFile("include_repos.txt")
+    EXCLUDE_REPOS_FILE = ConfigurationFile("exclude_repos.txt")
 
     # search template
     NONE = "None"

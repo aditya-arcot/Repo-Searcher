@@ -1,10 +1,10 @@
-""" contains repository and git enumerations classes """
+"""contains ADORepository class"""
 
 import os
 import time
 import git
 from git.repo import Repo
-from logging_manager import LoggingManager
+from logger import LoggingManager
 from constants import Messages, Constants
 
 

@@ -1,8 +1,8 @@
-""" contains results writer and search results classes """
+"""contains ResultsWriter class"""
 
 import os
 from constants import BranchSearchResults, Constants
-from config import ConfigManager
+from config import ConfigurationManager
 
 
 class ResultsWriter:
@@ -30,7 +30,7 @@ class ResultsWriter:
             for line in lines:
                 file.write(prefix + line + Constants.NEWLINE)
 
-    def write_config(self, config: ConfigManager) -> None:
+    def write_config(self, config: ConfigurationManager) -> None:
         """writes config info"""
         self.__write_lines(self.__details_file, config.config_str())
         self.__write_line(self.__details_file)
