@@ -1,2 +1,4 @@
 requests
 GitPython
+toml
+pylint

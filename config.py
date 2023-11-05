@@ -5,6 +5,7 @@ import time
 import sys
 import json
 from typing import Optional, Union
+import toml
 import requests
 from logger import LoggingManager
 from constants import Messages, Constants, ConfigurationFile
@@ -85,7 +86,9 @@ class ConfigurationManager:
 class ConfigurationHandler:
     """used to add config to manager"""
 
-    def __init__(self, config_manager: ConfigurationManager, logger: LoggingManager) -> None:
+    def __init__(
+        self, config_manager: ConfigurationManager, logger: LoggingManager
+    ) -> None:
         self.__config_manager = config_manager
         self.__logger = logger
         self.__config_folder = Constants.CONFIG_FOLDER
@@ -95,10 +98,10 @@ class ConfigurationHandler:
         self.__load_template()
         offline = self.__get_connection_status()
         if offline:
-            self.__logger.info(Messages.TOKEN_FILE_SKIP)
+            self.__logger.info(Messages.ADO_CONFIG_SKIP)
             self.__logger.info(Messages.LOCAL_REPO_DATA)
         else:
-            self.__load_token()
+            self.__load_ado_config()
             self.__create_repo_data()
         self.__load_search_words()
         self.__load_branch_timestamps()
@@ -134,9 +137,7 @@ class ConfigurationHandler:
             template = Constants.TEMPLATE_NONE
         else:
             self.__logger.info(Messages.SELECT_BRANCH_TEMPLATE)
-            branch_mode = self.__get_input(
-                [Constants.DEFAULT, Constants.ALL]
-            )
+            branch_mode = self.__get_input([Constants.DEFAULT, Constants.ALL])
             if branch_mode == 0:
                 template = Constants.TEMPLATE_DEFAULT
             else:
@@ -196,14 +197,30 @@ class ConfigurationHandler:
                 lines.append(line)
         return lines
 
-    def __load_token(self) -> None:
-        """Personal Access Token for ADO auth"""
-        token_file = Constants.TOKEN_FILE
-        lines = self.__read_file(token_file.filename())
+    def __load_ado_config(self) -> None:
+        """PAT, org, and project for ADO"""
+        ado_config_file = Constants.ADO_CONFIG_FILE
+        lines = self.__read_file(ado_config_file)
         if not lines:
-            self.__logger.critical(Messages.TOKEN_REQUIRED)
-        token = lines[0]
-        self.__config_manager.set_config(token_file.config_key(), token)
+            self.__logger.critical(Messages.ADO_CONFIG_REQUIRED)
+
+        try:
+            config = toml.loads(Constants.NEWLINE.join(lines))
+        except toml.decoder.TomlDecodeError:
+            self.__logger.critical(Messages.BAD_TOML)
+            sys.exit()
+
+        token_key = Constants.TOKEN_KEY
+        org_key = Constants.ORG_KEY
+        project_key = Constants.PROJECT_KEY
+
+        if any(s not in config for s in (token_key, org_key, project_key)):
+            self.__logger.critical(Messages.MISSING_INFO)
+            sys.exit()
+
+        self.__config_manager.set_config(token_key, config[token_key])
+        self.__config_manager.set_config(org_key, config[org_key])
+        self.__config_manager.set_config(project_key, config[project_key])
 
     def __read_repo_data(self, filename) -> dict:
         lines = self.__read_file(filename)
@@ -213,10 +230,7 @@ class ConfigurationHandler:
         data = json.loads("".join(lines))
         if Constants.LAST_UPDATE_KEY not in data:
             return {}
-        if (
-            time.time() - data[Constants.LAST_UPDATE_KEY]
-            > Constants.SECONDS_IN_DAY
-        ):
+        if time.time() - data[Constants.LAST_UPDATE_KEY] > Constants.SECONDS_IN_DAY:
             return {}
 
         return data
@@ -242,19 +256,23 @@ class ConfigurationHandler:
         self.__logger.info(Messages.REPO_DATA_ISSUE)
         self.__logger.info(Messages.GETTING_REPO_DATA)
 
+        org = self.__config_manager.get_str(Constants.ORG_KEY)
+        project = self.__config_manager.get_str(Constants.PROJECT_KEY)
         auth = (
             "user",
-            self.__config_manager.get_str(Constants.TOKEN_FILE.config_key()),
+            self.__config_manager.get_str(Constants.TOKEN_KEY),
         )
         resp = self.__make_request(
-            Constants.REPOS_URL, auth, Messages.REPOS_MAX_RETRIES
+            Constants.REPOS_URL.format(org=org, project=project),
+            auth,
+            Messages.REPOS_MAX_RETRIES,
         )
         assert resp is not None
         data = resp.json()
         if Constants.VALUE_KEY not in data:
             self.__logger.critical(Messages.BAD_JSON)
 
-        self.__add_branch_info(data, auth)
+        self.__add_branch_info(data, auth, org, project)
 
         data[Constants.LAST_UPDATE_KEY] = time.time()
         self.__write_repo_data(data, json_filename)
@@ -280,7 +298,9 @@ class ConfigurationHandler:
         self.__logger.critical(error_msg)
         return resp
 
-    def __add_branch_info(self, data: dict, auth: tuple) -> None:
+    def __add_branch_info(
+        self, data: dict, auth: tuple, org: str, project: str
+    ) -> None:
         for pos, repo in enumerate(data[Constants.VALUE_KEY]):
             if Constants.DEFAULT_BRANCH_KEY not in repo:
                 self.__logger.error(
@@ -301,22 +321,20 @@ class ConfigurationHandler:
                 )
             )
 
-            url = Constants.BRANCHES_URL.format(id=repo[Constants.ID_KEY])
+            url = Constants.BRANCHES_URL.format(
+                org=org, project=project, id=repo[Constants.ID_KEY]
+            )
             resp = self.__make_request(url, auth, Messages.BRANCH_MAX_RETRIES)
             if not resp:
                 sys.exit()
 
             branches_data = resp.json()
             branches = [
-                branch[Constants.NAME_KEY].replace(
-                    Constants.BRANCH_PREFIX, "", 1
-                )
+                branch[Constants.NAME_KEY].replace(Constants.BRANCH_PREFIX, "", 1)
                 for branch in branches_data[Constants.VALUE_KEY]
             ]
             assert repo[Constants.DEFAULT_BRANCH_KEY] in branches
-            data[Constants.VALUE_KEY][pos][
-                Constants.BRANCHES_KEY
-            ] = branches
+            data[Constants.VALUE_KEY][pos][Constants.BRANCHES_KEY] = branches
 
     def __load_search_words(self) -> None:
         """words to be used in repo search"""
@@ -391,9 +409,7 @@ class ConfigurationHandler:
         )
         repo_dict = {
             repo[Constants.NAME_KEY]: {
-                Constants.DEFAULT_BRANCH_KEY: repo[
-                    Constants.DEFAULT_BRANCH_KEY
-                ]
+                Constants.DEFAULT_BRANCH_KEY: repo[Constants.DEFAULT_BRANCH_KEY]
                 if Constants.DEFAULT_BRANCH_KEY in repo
                 else "",
                 Constants.BRANCHES_KEY: repo[Constants.BRANCHES_KEY],

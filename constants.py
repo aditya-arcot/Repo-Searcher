@@ -56,6 +56,7 @@ class Constants:
     RESULTS_FOLDER = "results"
 
     # files
+    ADO_CONFIG_FILE = "ado.toml"
     LOG_FILE = "program.log"
     CONFIG_FILE = "config.txt"
     DETAILS_FILE = "details.txt"
@@ -63,7 +64,6 @@ class Constants:
     FOUND_FILE = "found.txt"
 
     # ConfigFile objects
-    TOKEN_FILE = ConfigurationFile("token.txt")
     REPO_DATA_FILE = ConfigurationFile("repo_data.json")
     WORDS_FILE = ConfigurationFile("words.txt")
     BRANCH_UPDATES_FILE = ConfigurationFile("branch_updates.json")
@@ -84,6 +84,9 @@ class Constants:
     # config keys
     TEMPLATE_KEY = "template"
     OFFLINE_KEY = "offline"
+    TOKEN_KEY = "token"
+    ORG_KEY = "organization"
+    PROJECT_KEY = "project"
     TARGET_REPOS_KEY = "target_repos"
     REPOS_KEY = "repos"
 
@@ -99,11 +102,10 @@ class Constants:
 
     # ADO - learn.microsoft.com/en-us/rest/api/azure/devops/git/?view=azure-devops-rest-7.0
     BASE_URL = "https://dev.azure.com/"
-    __PROJECT = "bp-vsts/NAGPCCR/"
-    __PREFIX = __PROJECT + "_apis/git/repositories"
-    __POSTFIX = "api-version=7.0"
-    REPOS_URL = BASE_URL + __PREFIX + "?" + __POSTFIX
-    BRANCHES_URL = BASE_URL + __PREFIX + "/{id}/refs?filter=heads/&" + __POSTFIX
+    __API_PREFIX = "{org}/{project}/_apis/git/repositories"
+    __API_POSTFIX = "api-version=7.0"
+    REPOS_URL = BASE_URL + __API_PREFIX + "?" + __API_POSTFIX
+    BRANCHES_URL = BASE_URL + __API_PREFIX + "/{id}/refs?filter=heads/&" + __API_POSTFIX
     BRANCH_PREFIX = "refs/heads/"
 
 
@@ -128,12 +130,14 @@ class Messages:
     CONNECTION_FAILED = "connection failed"
     CONNECTION_STATUS = "offline - {offline}"
     # populate config
-    TOKEN_FILE_SKIP = "skipping loading of token"
+    ADO_CONFIG_SKIP = "skipping loading of ADO config info"
     LOCAL_REPO_DATA = "will attempt to use local repo data"
     # read file
     FILE_NOT_FOUND = "file not found - {path}"
-    # load token
-    TOKEN_REQUIRED = "token is required"
+    # load ado config
+    ADO_CONFIG_REQUIRED = "ADO config info (token, organization, project) is required"
+    BAD_TOML = "ADO config file not configured correctly"
+    MISSING_INFO = "ADO config file missing info"
     # create repo data
     REPO_DATA_OK = "repo data exists and was updated within the last day"
     REPO_DATA_ISSUE = "repo data either doesn't exist or requires update"
