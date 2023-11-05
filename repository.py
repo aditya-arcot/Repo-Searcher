@@ -28,7 +28,7 @@ class ADORepository:
         return Messages.STR.format(
             repo=self.name, url=self.url, path=self.path, branches=self.branches
         )
-    
+
     def __repr__(self) -> str:
         return self.__str__()
 

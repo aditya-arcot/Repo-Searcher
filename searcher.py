@@ -19,7 +19,7 @@ class RepositorySearcher:
         self,
         logger: LoggingManager,
         writer: ResultsWriter,
-        config: ConfigurationManager
+        config: ConfigurationManager,
     ) -> None:
         self.__logger = logger
         self.__writer = writer
@@ -153,7 +153,7 @@ class RepositorySearcher:
                     formatted_line = Messages.LINE.format(idx=idx + 1, line=line)
                     self.__logger.info(
                         Messages.MATCH.format(word=word, line=formatted_line),
-                        stdout=False
+                        stdout=False,
                     )
 
                     if not file_path in results.matches:
