@@ -72,12 +72,12 @@ class ConfigurationManager:
 
     def config_str(self) -> list[str]:
         """creates string of config info"""
-        out = ["Config"]
+        out = []
         for _type, config in self.__config.items():
-            out.append(Constants.TAB + _type.__name__)
+            out.append(_type.__name__)
             for key, val in config.items():
-                out.append((Constants.TAB * 2) + key)
-                out.append((Constants.TAB * 3) + str(val))
+                out.append(Constants.TAB + key)
+                out.append((Constants.TAB * 2) + str(val))
         return out
 
 

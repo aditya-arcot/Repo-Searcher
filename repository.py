@@ -24,6 +24,14 @@ class ADORepository:
         if not os.path.exists(self.path):
             os.makedirs(self.path)
 
+    def __str__(self) -> str:
+        return Messages.STR.format(
+            repo=self.name, url=self.url, path=self.path, branches=self.branches
+        )
+    
+    def __repr__(self) -> str:
+        return self.__str__()
+
     def update_branch(self, branch) -> tuple[bool, float]:
         """updates local branch files if necessary"""
         assert branch in self.branches

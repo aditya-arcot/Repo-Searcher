@@ -57,6 +57,7 @@ class Constants:
 
     # files
     LOG_FILE = "program.log"
+    CONFIG_FILE = "config.txt"
     DETAILS_FILE = "details.txt"
     MATCHES_FILE = "matches.txt"
     FOUND_FILE = "found.txt"
@@ -178,6 +179,7 @@ class Messages:
     WARN_MSG = "warning - {msg}"
 
     ## repository
+    STR = "{repo} - {url}, {branches}, {path}"
     PATH_EXISTS = "branch path exists"
     PATH_DOESNT_EXIST = "branch path does not exist"
     INTERVAL = 1
@@ -203,4 +205,5 @@ class Messages:
     LINE = "line {idx} - {line}"
     MATCH = "match - {word} - {line}"
     PATH_TOO_LONG = "file not found - path too long? - {path}"
+    DECODING_SUCCESS = "decoding success - {path}"
     DECODING_FAILED = "decoding failure - {path}"

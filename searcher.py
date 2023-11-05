@@ -14,8 +14,12 @@ from repository import ADORepository
 # pylint: disable=too-many-instance-attributes, too-few-public-methods
 class RepositorySearcher:
     """used to search for specified text in repos"""
+
     def __init__(
-        self, logger: LoggingManager, writer: ResultsWriter, config: ConfigurationManager
+        self,
+        logger: LoggingManager,
+        writer: ResultsWriter,
+        config: ConfigurationManager
     ) -> None:
         self.__logger = logger
         self.__writer = writer
@@ -128,7 +132,7 @@ class RepositorySearcher:
 
             for file in files:
                 file_path = os.path.join(root, file)
-                self.__logger.info(Messages.FILE.format(path=file_path))
+                self.__logger.info(Messages.FILE.format(path=file_path), stdout=False)
                 self.__search_file(file_path, results)
 
         return results
@@ -148,7 +152,8 @@ class RepositorySearcher:
                         line = Messages.LINE_TOO_LONG
                     formatted_line = Messages.LINE.format(idx=idx + 1, line=line)
                     self.__logger.info(
-                        Messages.MATCH.format(word=word, line=formatted_line)
+                        Messages.MATCH.format(word=word, line=formatted_line),
+                        stdout=False
                     )
 
                     if not file_path in results.matches:
@@ -162,10 +167,15 @@ class RepositorySearcher:
         try:
             with open(path, "r", encoding=Constants.ENCODING, errors="ignore") as file:
                 lines = [line.lower().strip() for line in file.readlines()]
+            self.__logger.info(
+                Messages.DECODING_SUCCESS.format(path=path), stdout=False
+            )
         except FileNotFoundError:
-            self.__logger.error(Messages.PATH_TOO_LONG.format(path=path))
+            self.__logger.error(Messages.PATH_TOO_LONG.format(path=path), stdout=False)
             return (False, lines)
         except (UnicodeDecodeError, UnicodeError):
-            self.__logger.error(Messages.DECODING_FAILED.format(path=path))
+            self.__logger.error(
+                Messages.DECODING_FAILED.format(path=path), stdout=False
+            )
             return (False, lines)
         return (True, lines)

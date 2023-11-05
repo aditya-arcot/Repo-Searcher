@@ -14,12 +14,12 @@ class ResultsWriter:
         if not os.path.exists(path):
             os.makedirs(path)
 
+        self.__config_file = os.path.join(path, Constants.CONFIG_FILE)
         self.__details_file = os.path.join(path, Constants.DETAILS_FILE)
         self.__matches_file = os.path.join(path, Constants.MATCHES_FILE)
         self.__words_file = os.path.join(path, Constants.FOUND_FILE)
 
-        self.__repo_counter = 0
-        self.__words = set()
+        self.__found_words = set()
 
     def __write_line(self, filename, line="") -> None:
         with open(filename, "a", encoding=Constants.ENCODING) as file:
@@ -30,26 +30,18 @@ class ResultsWriter:
             for line in lines:
                 file.write(prefix + line + Constants.NEWLINE)
 
-    def write_config(self, config: ConfigurationManager) -> None:
-        """writes config info"""
-        self.__write_lines(self.__details_file, config.config_str())
-        self.__write_line(self.__details_file)
-
     def write_repo_start(self, name: str) -> None:
         """writes repo start section"""
-        lines = ["Search"] if not self.__repo_counter else []
-        lines.append(Constants.TAB + name)
-        self.__repo_counter += 1
-        self.__write_lines(self.__details_file, lines)
+        self.__write_line(self.__details_file, name)
 
     def write_branch_start(self, name: str) -> None:
         """writes branch start section"""
-        line = Constants.TAB * 2 + name
+        line = Constants.TAB + name
         self.__write_line(self.__details_file, line)
 
     def write_branch_skip(self, reason: str) -> None:
         """writes branch skip section"""
-        line = Constants.TAB * 2 + f"skipped - {reason}"
+        line = Constants.TAB + f"skipped - {reason}"
         self.__write_line(self.__details_file, line)
 
     def write_branch_results(
@@ -64,7 +56,7 @@ class ResultsWriter:
             for path in results.matches:
                 lines.append(path)
                 for search_word in results.matches[path].keys():
-                    self.__words.add(search_word)
+                    self.__found_words.add(search_word)
                     lines.append(Constants.TAB + search_word)
                     for match in results.matches[path][search_word]:
                         lines.append(Constants.TAB * 2 + match)
@@ -78,9 +70,9 @@ class ResultsWriter:
                 self.__write_lines(self.__matches_file, lines, Constants.TAB * 2)
 
                 self.__write_line(
-                    self.__details_file, f"{Constants.TAB * 3}Matches ({count})"
+                    self.__details_file, f"{Constants.TAB * 2}Matches ({count})"
                 )
-                self.__write_lines(self.__details_file, lines, Constants.TAB * 4)
+                self.__write_lines(self.__details_file, lines, Constants.TAB * 3)
 
         sections = {
             "Errors": results.errors,
@@ -101,7 +93,7 @@ class ResultsWriter:
         if len(section) == 0:
             return []
 
-        spacer = Constants.TAB * 3
+        spacer = Constants.TAB * 2
         lines = [f"{spacer}{name} ({len(section)})"]
 
         spacer += Constants.TAB
@@ -109,6 +101,11 @@ class ResultsWriter:
             lines.append(spacer + i)
         return lines
 
+    def write_config(self, config: ConfigurationManager) -> None:
+        """writes config info"""
+        self.__write_lines(self.__config_file, config.config_str())
+
     def write_found_words(self) -> None:
         """writes list of words found in search"""
-        self.__write_lines(self.__words_file, list(self.__words))
+        if self.__found_words:
+            self.__write_lines(self.__words_file, list(self.__found_words))
