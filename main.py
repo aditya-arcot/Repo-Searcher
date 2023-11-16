@@ -9,7 +9,6 @@ from searcher import RepositorySearcher
 
 if __name__ == "__main__":
     date_str = datetime.now().strftime("%m-%d-%Y_%H-%M-%S")
-
     logger = LoggingManager(date_str)
     config_manager = ConfigurationManager(logger)
     config_handler = ConfigurationHandler(config_manager, logger)

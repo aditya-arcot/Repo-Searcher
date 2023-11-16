@@ -72,15 +72,6 @@ class Constants:
     INCLUDE_REPOS_FILE = ConfigurationFile("include_repos.txt")
     EXCLUDE_REPOS_FILE = ConfigurationFile("exclude_repos.txt")
 
-    # search template
-    NONE = "None"
-    ALL = "All"
-    DEFAULT = "Default"
-
-    TEMPLATE_NONE = "no repos"
-    TEMPLATE_DEFAULT = "all repos, default branch"
-    TEMPLATE_ALL = "all repos, all branches"
-
     # config keys
     TEMPLATE_KEY = "template"
     OFFLINE_KEY = "offline"
@@ -121,6 +112,12 @@ class Messages:
     SELECT_BRANCH_TEMPLATE = "select a branch search template for initialization"
     TEMPLATE = "search template - {template}"
     MODIFY_TEMPLATE = "include/exclude files will be used to modify this template"
+    NONE = "None"
+    ALL = "All"
+    DEFAULT = "Default"
+    TEMPLATE_NONE = "no repos"
+    TEMPLATE_DEFAULT = "all repos, default branch"
+    TEMPLATE_ALL = "all repos, all branches"
     # get input
     ENTER_VALID_INTEGER = "enter a valid integer: "
     VALUE_ENTERED = "entered - {val}"
@@ -211,3 +208,11 @@ class Messages:
     PATH_TOO_LONG = "file not found - path too long? - {path}"
     DECODING_SUCCESS = "decoding success - {path}"
     DECODING_FAILED = "decoding failure - {path}"
+
+    ## writer
+    MATCHES = "Matches"
+    ERRORS = "Errors"
+    SKIPPED_FOLDERS = "Skipped folders"
+    SKIPPED_FILES = "Skipped files"
+    SEARCHED_FOLDERS = "Searched folders"
+    SEARCHED_FILES = "Searched files"

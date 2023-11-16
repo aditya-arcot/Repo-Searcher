@@ -34,13 +34,12 @@ class ConfigurationManager:
             self.__config[_type] = {}
         self.__config[_type][key] = val
 
-    def __log_not_found_error(self, key: str, _type: str) -> None:
-        self.__logger.error(Messages.CONFIG_ITEM_NOT_FOUND.format(key=key, type=_type))
-
     def __get_helper(self, key: str, _type: type) -> tuple:
         if key in self.__config[_type]:
             return True, self.__config[_type][key]
-        self.__log_not_found_error(key, _type.__name__)
+        self.__logger.error(
+            Messages.CONFIG_ITEM_NOT_FOUND.format(key=key, type=_type.__name__)
+        )
         return False, -1
 
     def get_str(self, key: str, default: str = "") -> str:
@@ -71,7 +70,7 @@ class ConfigurationManager:
             return val
         return {} if default is None else default
 
-    def config_str(self) -> list[str]:
+    def config_str(self) -> str:
         """creates string of config info"""
         out = []
         for _type, config in self.__config.items():
@@ -79,7 +78,7 @@ class ConfigurationManager:
             for key, val in config.items():
                 out.append(Constants.TAB + key)
                 out.append((Constants.TAB * 2) + str(val))
-        return out
+        return Constants.NEWLINE.join(out)
 
 
 # pylint: disable=too-few-public-methods
@@ -131,17 +130,17 @@ class ConfigurationHandler:
     ) -> None:
         """repo/branch template for search"""
         self.__logger.info(Messages.SELECT_REPO_TEMPLATE)
-        repo_mode = self.__get_input([Constants.NONE, Constants.ALL])
+        repo_mode = self.__get_input([Messages.NONE, Messages.ALL])
 
         if repo_mode == 0:
-            template = Constants.TEMPLATE_NONE
+            template = Messages.TEMPLATE_NONE
         else:
             self.__logger.info(Messages.SELECT_BRANCH_TEMPLATE)
-            branch_mode = self.__get_input([Constants.DEFAULT, Constants.ALL])
+            branch_mode = self.__get_input([Messages.DEFAULT, Messages.ALL])
             if branch_mode == 0:
-                template = Constants.TEMPLATE_DEFAULT
+                template = Messages.TEMPLATE_DEFAULT
             else:
-                template = Constants.TEMPLATE_ALL
+                template = Messages.TEMPLATE_ALL
 
         self.__config_manager.set_config(Constants.TEMPLATE_KEY, template)
         self.__logger.info(Messages.TEMPLATE.format(template=template))
@@ -291,9 +290,12 @@ class ConfigurationHandler:
                 attempts += 1
                 self.__logger.error(Messages.REQUEST_FAILED)
 
-            except requests.exceptions.ConnectionError:
+            except (
+                requests.exceptions.ConnectionError,
+                requests.exceptions.ReadTimeout,
+            ) as e:
                 attempts += 1
-                self.__logger.error(Messages.REQUEST_FAILED)
+                self.__logger.error(f"{Messages.REQUEST_FAILED} - {e}")
 
         self.__logger.critical(error_msg)
         return resp
@@ -420,15 +422,15 @@ class ConfigurationHandler:
         target_repos = {}
         template = self.__config_manager.get_str(Constants.TEMPLATE_KEY)
         match template:
-            case Constants.TEMPLATE_NONE:
+            case Messages.TEMPLATE_NONE:
                 pass
-            case Constants.TEMPLATE_DEFAULT:
+            case Messages.TEMPLATE_DEFAULT:
                 target_repos = {
                     name: {details[Constants.DEFAULT_BRANCH_KEY]}
                     for name, details in repo_dict.items()
                     if len(details[Constants.BRANCHES_KEY]) != 0
                 }
-            case Constants.TEMPLATE_ALL:
+            case Messages.TEMPLATE_ALL:
                 target_repos = {
                     name: set(details[Constants.BRANCHES_KEY])
                     for name, details in repo_dict.items()
