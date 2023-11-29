@@ -520,17 +520,14 @@ class ConfigurationHandler:
 
         repos: list[ADORepository] = []
         for repo, branches in target_repos.items():
-            url = next(
-                (
-                    d[Constants.REMOTE_URL_KEY]
-                    for d in repo_data[Constants.VALUE_KEY]
-                    if d.get(Constants.NAME_KEY) == repo
-                ),
-                None,
+            org = self.__config_manager.get_str(Constants.ORG_KEY)
+            project = self.__config_manager.get_str(Constants.PROJECT_KEY)
+            token = self.__config_manager.get_str(Constants.TOKEN_KEY)
+
+            url = Constants.REPO_URL.format(org=org, project=project, name=repo)
+            auth_url = Constants.REPO_AUTH_URL.format(
+                token=token, org=org, project=project, name=repo
             )
-            if url is None:
-                self.__logger.error(Messages.NO_URL.format(repo=repo))
-                continue
 
             repos.append(
                 ADORepository(
@@ -538,6 +535,7 @@ class ConfigurationHandler:
                     repo,
                     branches,
                     url,
+                    auth_url,
                     os.path.join(Constants.REPOS_FOLDER, repo),
                 )
             )

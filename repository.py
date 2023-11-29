@@ -13,13 +13,20 @@ class ADORepository:
     """Azure DevOps repository"""
 
     def __init__(
-        self, logger: LoggingManager, name: str, branches: set[str], url: str, path: str
+        self,
+        logger: LoggingManager,
+        name: str,
+        branches: set[str],
+        url: str,
+        auth_url: str,
+        path: str,
     ) -> None:
         self.logger = logger
 
         self.name = name
         self.branches = branches
         self.url = url
+        self.auth_url = auth_url
         self.path = path
         if not os.path.exists(self.path):
             os.makedirs(self.path)
@@ -64,7 +71,7 @@ class ADORepository:
                 repo.remotes.origin.pull(branch)
             else:
                 Repo.clone_from(
-                    self.url, os.path.join(self.path, branch), branch=branch
+                    self.auth_url, os.path.join(self.path, branch), branch=branch
                 )
 
             self.logger.info(Messages.GIT_SUCCESS.format(mode=mode))

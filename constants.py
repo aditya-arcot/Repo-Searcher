@@ -99,6 +99,11 @@ class Constants:
     BRANCHES_URL = BASE_URL + __API_PREFIX + "/{id}/refs?filter=heads/&" + __API_POSTFIX
     BRANCH_PREFIX = "refs/heads/"
 
+    __HTTPS = "https://"
+    __REPO_URL = "dev.azure.com/{org}/{project}/_git/{name}"
+    REPO_URL = __HTTPS + __REPO_URL
+    REPO_AUTH_URL = __HTTPS + "{token}@" + __REPO_URL
+
 
 # pylint: disable=missing-class-docstring
 class Messages:
