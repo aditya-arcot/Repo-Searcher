@@ -36,7 +36,8 @@ class Constants:
     TAB = "\t"
     NEWLINE = "\n"
     ENCODING = "utf-8"
-    COMMENT_PREFIX = "#"
+    CONFIG_COMMENT_PREFIX = "#"
+    COMMENT_PREFIXES = ("#", "//")
     WILDCARD = "*"
     # ENCODED_SPACE = "%20"
     RE_PATTERN = "(?<![a-z0-9_]){word}(?![a-z0-9_])"

@@ -170,6 +170,10 @@ class RepositorySearcher:
             self.__logger.info(
                 Messages.DECODING_SUCCESS.format(path=path), stdout=False
             )
+            lines = [
+                "" if line.startswith(Constants.COMMENT_PREFIXES) else line
+                for line in lines
+            ]
         except FileNotFoundError:
             self.__logger.error(Messages.PATH_TOO_LONG.format(path=path), stdout=False)
             return (False, lines)

@@ -189,7 +189,7 @@ class ConfigurationHandler:
         with open(path, "r", encoding=Constants.ENCODING) as file:
             for line in file.readlines():
                 line = line.strip()
-                if line.startswith(Constants.COMMENT_PREFIX) or line == "":
+                if line.startswith(Constants.CONFIG_COMMENT_PREFIX) or line == "":
                     continue
                 if lowercase:
                     line = line.lower()
