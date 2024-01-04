@@ -1,4 +1,5 @@
 .DS_Store
+.megaignore
 
 __pycache__/
 .venv/
