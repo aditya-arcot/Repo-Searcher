@@ -35,6 +35,7 @@ class RepositorySearcher:
             Constants.EXCLUDE_FILES_FILE.config_key()
         )
         self.__repos: list[ADORepository] = config.get_list(Constants.REPOS_KEY)
+        self.__pattern = config.get_str(Constants.PATTERN_KEY)
 
     def search(self) -> None:
         """search target repos and branches"""
@@ -145,7 +146,7 @@ class RepositorySearcher:
             return
 
         for word in self.__words:
-            pattern = Constants.RE_PATTERN.format(word=word)
+            pattern = self.__pattern.format(word=word)
             for idx, line in enumerate(lines):
                 if re.search(pattern, line):
                     if len(line) > Constants.MAX_PREVIEW_LENGTH:

@@ -17,6 +17,17 @@ class ConfigurationFile:
         return self.__filename.split(".")[0]
 
 
+class RegexSearchPattern:
+    """represents a regex search"""
+
+    def __init__(self, name, pattern) -> None:
+        self.name = name
+        self.pattern = pattern
+
+    def __repr__(self) -> str:
+        return f"{self.name} - {self.pattern}"
+
+
 # pylint: disable=too-few-public-methods
 class BranchSearchResults:
     """represents results of branch search"""
@@ -40,10 +51,15 @@ class Constants:
     COMMENT_PREFIXES = ("#", "//")
     WILDCARD = "*"
     # ENCODED_SPACE = "%20"
-    RE_PATTERN = "(?<![a-z0-9_]){word}(?![a-z0-9_])"
-    DEFAULT_TIME = -1
+
+    # search patterns
+    NO_PATTERN = RegexSearchPattern("no pattern", "{word}")
+    DB_TABLE_PATTERN = RegexSearchPattern(
+        "database table pattern", "(?<![a-z0-9_]){word}(?![a-z0-9_])"
+    )
 
     # numbers
+    DEFAULT_TIME = -1
     SECONDS_IN_DAY = 86400
     TIMEOUT = 5
     RETRIES = 5
@@ -75,6 +91,7 @@ class Constants:
 
     # config keys
     TEMPLATE_KEY = "template"
+    PATTERN_KEY = "pattern"
     OFFLINE_KEY = "offline"
     TOKEN_KEY = "token"
     ORG_KEY = "organization"
@@ -129,6 +146,12 @@ class Messages:
     VALUE_ENTERED = "entered - {val}"
     INVALID_INTEGER = "invalid, please try again"
     KEYBOARD_INTERRUPT = "keyboard interrupt"
+    # load regex pattern
+    SELECT_REGEX_PATTERN = "select a regex pattern or specify your own"
+    CUSTOM_PATTERN = "custom pattern"
+    ENTER_REGEX_PATTERN = "enter a regex pattern containing {word}"
+    ENTER_VALID_PATTERN = "enter a valid pattern: "
+    PATTERN = "regex pattern - {pattern}"
     # get connection status
     CONNECTION_FAILED = "connection failed"
     CONNECTION_STATUS = "offline - {offline}"

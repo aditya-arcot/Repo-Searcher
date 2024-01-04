@@ -1,6 +1,7 @@
 """contains ConfigurationManager, ConfigurationHandler classes"""
 
 import os
+import re
 import time
 import sys
 import json
@@ -95,6 +96,7 @@ class ConfigurationHandler:
     def populate_config(self) -> None:
         """populate config manager with files, user input, and other logic"""
         self.__load_template()
+        self.__load_search_pattern()
         offline = self.__get_connection_status()
         if offline:
             self.__logger.info(Messages.ADO_CONFIG_SKIP)
@@ -130,13 +132,12 @@ class ConfigurationHandler:
     ) -> None:
         """repo/branch template for search"""
         self.__logger.info(Messages.SELECT_REPO_TEMPLATE)
-        repo_mode = self.__get_input([Messages.NONE, Messages.ALL])
-
+        repo_mode = self.__get_choice_index([Messages.NONE, Messages.ALL])
         if repo_mode == 0:
             template = Messages.TEMPLATE_NONE
         else:
             self.__logger.info(Messages.SELECT_BRANCH_TEMPLATE)
-            branch_mode = self.__get_input([Messages.DEFAULT, Messages.ALL])
+            branch_mode = self.__get_choice_index([Messages.DEFAULT, Messages.ALL])
             if branch_mode == 0:
                 template = Messages.TEMPLATE_DEFAULT
             else:
@@ -146,10 +147,29 @@ class ConfigurationHandler:
         self.__logger.info(Messages.TEMPLATE.format(template=template))
         self.__logger.info(Messages.MODIFY_TEMPLATE)
 
-    def __get_input(self, options: list) -> int:
-        """gets user choice from options"""
-        for pos, option in enumerate(options):
-            self.__logger.info(f" {pos} - {option}")
+    def __load_search_pattern(self) -> None:
+        """regex search pattern"""
+        self.__logger.info(Messages.SELECT_REGEX_PATTERN)
+        options = [
+            Constants.NO_PATTERN,
+            Constants.DB_TABLE_PATTERN,
+            Messages.CUSTOM_PATTERN,
+        ]
+        choice = self.__get_choice_index(options)
+        match choice:
+            case 0:
+                pattern = Constants.NO_PATTERN.pattern
+            case 1:
+                pattern = Constants.DB_TABLE_PATTERN.pattern
+            case _:
+                pattern = self.__get_custom_regex_pattern()
+        self.__config_manager.set_config(Constants.PATTERN_KEY, pattern)
+        self.__logger.info(Messages.PATTERN.format(pattern=pattern))
+
+    def __get_choice_index(self, options: list) -> int:
+        """gets user choice index from options"""
+        for ind, option in enumerate(options):
+            self.__logger.info(f"{ind} - {option}")
 
         while True:
             try:
@@ -162,6 +182,22 @@ class ConfigurationHandler:
                 self.__logger.critical(Messages.KEYBOARD_INTERRUPT)
             except ValueError:
                 self.__logger.info(Messages.INVALID_INTEGER)
+
+    def __get_custom_regex_pattern(self):
+        """gets custom regex pattern from user input"""
+        self.__logger.info(Messages.ENTER_REGEX_PATTERN)
+        while True:
+            try:
+                pattern = input(Messages.ENTER_VALID_PATTERN)
+                self.__logger.info(Messages.VALUE_ENTERED.format(val=pattern))
+                if not "{word}" in pattern:
+                    continue
+                re.compile(pattern)
+                return pattern
+            except KeyboardInterrupt:
+                self.__logger.critical(Messages.KEYBOARD_INTERRUPT)
+            except re.error:
+                continue
 
     def __get_connection_status(self) -> bool:
         """status of connection request to ADO"""
@@ -510,10 +546,6 @@ class ConfigurationHandler:
 
     def __create_repos(self) -> None:
         """create and store repo objects for target repos"""
-        repo_data = self.__config_manager.get_dict(
-            Constants.REPO_DATA_FILE.config_key()
-        )
-
         target_repos: dict[str, set] = self.__config_manager.get_dict(
             Constants.TARGET_REPOS_KEY
         )
