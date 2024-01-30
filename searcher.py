@@ -142,6 +142,7 @@ class RepositorySearcher:
         result, lines = self.__read_file(file_path)
         if not result:
             results.errors.append(file_path)
+        results.files.append(file_path)
         if not lines:
             return
 
