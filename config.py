@@ -112,7 +112,7 @@ class ConfigurationHandler:
         self.__load_excluded_repos()
         self.__load_repo_data()
         self.__create_target_repos()
-        self.__create_repos()
+        self.__create_repos(offline)
 
     def write_branch_updates(self) -> None:
         """write branch updates to json file"""
@@ -447,9 +447,11 @@ class ConfigurationHandler:
         )
         repo_dict = {
             repo[Constants.NAME_KEY]: {
-                Constants.DEFAULT_BRANCH_KEY: repo[Constants.DEFAULT_BRANCH_KEY]
-                if Constants.DEFAULT_BRANCH_KEY in repo
-                else "",
+                Constants.DEFAULT_BRANCH_KEY: (
+                    repo[Constants.DEFAULT_BRANCH_KEY]
+                    if Constants.DEFAULT_BRANCH_KEY in repo
+                    else ""
+                ),
                 Constants.BRANCHES_KEY: repo[Constants.BRANCHES_KEY],
             }
             for repo in repo_data[Constants.VALUE_KEY]
@@ -544,7 +546,7 @@ class ConfigurationHandler:
                             Messages.BRANCH_EXCLUDED.format(branch=branch, repo=name)
                         )
 
-    def __create_repos(self) -> None:
+    def __create_repos(self, offline: bool) -> None:
         """create and store repo objects for target repos"""
         target_repos: dict[str, set] = self.__config_manager.get_dict(
             Constants.TARGET_REPOS_KEY
@@ -552,12 +554,22 @@ class ConfigurationHandler:
 
         repos: list[ADORepository] = []
         for repo, branches in target_repos.items():
+            if offline:
+                repos.append(
+                    ADORepository(
+                        self.__logger,
+                        repo,
+                        branches,
+                        os.path.join(Constants.REPOS_FOLDER, repo),
+                    )
+                )
+                continue
+
             org = self.__config_manager.get_str(Constants.ORG_KEY)
             project = self.__config_manager.get_str(Constants.PROJECT_KEY)
             token = self.__config_manager.get_str(Constants.TOKEN_KEY)
 
-            url = Constants.REPO_URL.format(org=org, project=project, name=repo)
-            auth_url = Constants.REPO_AUTH_URL.format(
+            url = Constants.REPO_URL.format(
                 token=token, org=org, project=project, name=repo
             )
 
@@ -566,9 +578,8 @@ class ConfigurationHandler:
                     self.__logger,
                     repo,
                     branches,
-                    url,
-                    auth_url,
                     os.path.join(Constants.REPOS_FOLDER, repo),
+                    url,
                 )
             )
 

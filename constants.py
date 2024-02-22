@@ -116,11 +116,7 @@ class Constants:
     REPOS_URL = BASE_URL + __API_PREFIX + "?" + __API_POSTFIX
     BRANCHES_URL = BASE_URL + __API_PREFIX + "/{id}/refs?filter=heads/&" + __API_POSTFIX
     BRANCH_PREFIX = "refs/heads/"
-
-    __HTTPS = "https://"
-    __REPO_URL = "dev.azure.com/{org}/{project}/_git/{name}"
-    REPO_URL = __HTTPS + __REPO_URL
-    REPO_AUTH_URL = __HTTPS + "{token}@" + __REPO_URL
+    REPO_URL = "https://{token}@dev.azure.com/{org}/{project}/_git/{name}"
 
 
 # pylint: disable=missing-class-docstring
@@ -209,7 +205,7 @@ class Messages:
     WARN_MSG = "warning - {msg}"
 
     ## repository
-    STR = "{repo} - {url}, {branches}, {path}"
+    STR = "{repo} - {branches}, {path}"
     PATH_EXISTS = "branch path exists"
     PATH_DOESNT_EXIST = "branch path does not exist"
     INTERVAL = 1
@@ -219,6 +215,7 @@ class Messages:
     GIT_FAILURE = "{mode} failed - {err}"
     PULL = "pull"
     CLONE = "clone"
+    URL_NOT_SPECIFIED = "repo url not specified"
 
     ## searcher
     SEARCHING = "starting search"

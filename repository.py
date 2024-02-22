@@ -2,6 +2,7 @@
 
 import os
 import time
+from typing import Union
 import git
 from git.repo import Repo
 from logger import LoggingManager
@@ -17,23 +18,21 @@ class ADORepository:
         logger: LoggingManager,
         name: str,
         branches: set[str],
-        url: str,
-        auth_url: str,
         path: str,
+        url: Union[str, None] = None,
     ) -> None:
         self.logger = logger
 
         self.name = name
         self.branches = branches
-        self.url = url
-        self.auth_url = auth_url
         self.path = path
+        self.url = url
         if not os.path.exists(self.path):
             os.makedirs(self.path)
 
     def __str__(self) -> str:
         return Messages.STR.format(
-            repo=self.name, url=self.url, path=self.path, branches=self.branches
+            repo=self.name, path=self.path, branches=self.branches
         )
 
     def __repr__(self) -> str:
@@ -70,8 +69,11 @@ class ADORepository:
                 repo.git.clean("-f", "-d", "-x")
                 repo.remotes.origin.pull(branch)
             else:
+                if self.url is None:
+                    self.logger.error(Messages.URL_NOT_SPECIFIED)
+                    return False
                 Repo.clone_from(
-                    self.auth_url, os.path.join(self.path, branch), branch=branch
+                    self.url, os.path.join(self.path, branch), branch=branch
                 )
 
             self.logger.info(Messages.GIT_SUCCESS.format(mode=mode))
