@@ -6,4 +6,5 @@ __pycache__/
 .vscode/
 repos/
 results/
-config/
+config/branch_updates.json
+config/repo_data.json
